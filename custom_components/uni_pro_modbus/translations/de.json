@@ -1,0 +1,46 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "UNI PRO Modbus-Bridge",
+        "description": "Verbindung zur Modbus-TCP-Bridge herstellen (z. B. ein ESP32 RS485-zu-TCP-Gateway), die per RS485 an deinen UNI2/UNI3 PRO Regler angeschlossen ist.",
+        "data": {
+          "host": "IP-Adresse oder Hostname der Bridge",
+          "port": "TCP-Port der Bridge",
+          "unit_id": "Modbus Slave-ID (Geräteadresse)",
+          "model": "Reglermodell",
+          "scan_interval": "Abfrageintervall (Sekunden)"
+        }
+      },
+      "circuits": {
+        "title": "Heizkreise",
+        "description": "Wähle die tatsächlich genutzten Heizkreise (CO1-CO7) für dieses {model}, sowie ob Warmwasser/Zirkulation eingebunden werden sollen.",
+        "data": {
+          "circuits": "Aktive Heizkreise",
+          "dhw": "Warmwasser (DHW) einbinden",
+          "circulation": "Zirkulationskreis einbinden"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Bridge nicht erreichbar oder keine Antwort vom Regler. Prüfe IP/Port sowie RS485-Verkabelung und Slave-ID.",
+      "unknown": "Unerwarteter Fehler, siehe Home-Assistant-Log für Details."
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "UNI PRO Modbus Optionen",
+        "data": {
+          "circuits": "Aktive Heizkreise",
+          "dhw": "Warmwasser (DHW) einbinden",
+          "circulation": "Zirkulationskreis einbinden",
+          "scan_interval": "Abfrageintervall (Sekunden)"
+        }
+      }
+    }
+  }
+}
