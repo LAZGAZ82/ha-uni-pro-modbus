@@ -1,6 +1,7 @@
 """Config flow for the UNI PRO Modbus (TCP bridge) integration."""
 from __future__ import annotations
 
+import inspect
 import logging
 from typing import Any
 
@@ -31,6 +32,18 @@ from .registers import build_active_registers
 _LOGGER = logging.getLogger(__name__)
 
 
+def _slave_kw(client) -> str:
+    """pymodbus renamed the `slave` kwarg to `device_id` in newer releases
+    (3.7+). Detect which one the actually-installed version expects from the
+    real method signature, so this works across whatever pymodbus version
+    each customer's Home Assistant happens to have bundled."""
+    try:
+        params = inspect.signature(client.read_holding_registers).parameters
+    except (TypeError, ValueError):
+        params = {}
+    return "device_id" if "device_id" in params else "slave"
+
+
 async def _validate_connection(hass, host: str, port: int, unit_id: int) -> None:
     """Try to read the general status register to confirm the bridge + device work."""
     from pymodbus.client import AsyncModbusTcpClient
@@ -40,7 +53,9 @@ async def _validate_connection(hass, host: str, port: int, unit_id: int) -> None
         await client.connect()
         if not client.connected:
             raise CannotConnect(f"Could not open TCP connection to {host}:{port}")
-        result = await client.read_input_registers(address=0, count=1, slave=unit_id)
+        result = await client.read_input_registers(
+            address=0, count=1, **{_slave_kw(client): unit_id}
+        )
         if result is None or result.isError():
             raise CannotConnect(
                 f"Bridge reachable, but Modbus read from unit {unit_id} failed: {result}"
@@ -82,19 +97,27 @@ class UniProModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self._data.update(user_input)
                 return await self.async_step_circuits()
 
+        # Re-show whatever the user just typed (not the hardcoded defaults)
+        # when validation failed, so a failed attempt doesn't wipe the form.
+        defaults = user_input or {}
         schema = vol.Schema(
             {
-                vol.Required(CONF_HOST, default=DEFAULT_HOST): str,
-                vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
-                vol.Required(CONF_UNIT_ID, default=DEFAULT_UNIT_ID): vol.All(
-                    int, vol.Range(min=1, max=247)
-                ),
-                vol.Required("model", default=Model.UNI3_PRO.value): vol.In(
-                    {m.value: label for m, label in MODEL_LABELS.items()}
-                ),
-                vol.Required(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
-                    int, vol.Range(min=5, max=600)
-                ),
+                vol.Required(
+                    CONF_HOST, default=defaults.get(CONF_HOST, DEFAULT_HOST)
+                ): str,
+                vol.Required(
+                    CONF_PORT, default=defaults.get(CONF_PORT, DEFAULT_PORT)
+                ): int,
+                vol.Required(
+                    CONF_UNIT_ID, default=defaults.get(CONF_UNIT_ID, DEFAULT_UNIT_ID)
+                ): vol.All(int, vol.Range(min=1, max=247)),
+                vol.Required(
+                    "model", default=defaults.get("model", Model.UNI3_PRO.value)
+                ): vol.In({m.value: label for m, label in MODEL_LABELS.items()}),
+                vol.Required(
+                    CONF_SCAN_INTERVAL,
+                    default=defaults.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+                ): vol.All(int, vol.Range(min=5, max=600)),
             }
         )
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)

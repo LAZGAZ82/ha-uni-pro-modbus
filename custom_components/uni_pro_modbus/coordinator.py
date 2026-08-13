@@ -1,6 +1,7 @@
 """DataUpdateCoordinator for the UNI PRO Modbus TCP bridge."""
 from __future__ import annotations
 
+import inspect
 import logging
 from datetime import timedelta
 from typing import Any
@@ -47,6 +48,7 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
         self._unit_id = unit_id
         self._entry = entry
         self._client: Any | None = None
+        self._slave_kwarg: str | None = None
 
         # De-duplicate registers by (reg_type, address) since several
         # RegisterDef entries (bit fields) share the same physical register.
@@ -68,19 +70,39 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
             raise UniProModbusError(f"Cannot connect to bridge at {self._host}:{self._port}")
         return self._client
 
+    def _slave_kw(self, client) -> str:
+        """Return the keyword this pymodbus install expects for the unit/slave id.
+
+        pymodbus renamed this argument from `slave` to `device_id` in newer
+        releases (3.7+). Detect which one the actually-installed version
+        wants once, from the real method signature, and cache it -- so this
+        integration keeps working across whatever pymodbus version each
+        customer's Home Assistant happens to have bundled, instead of
+        breaking with a TypeError on one side or the other.
+        """
+        if self._slave_kwarg is None:
+            try:
+                params = inspect.signature(client.read_holding_registers).parameters
+            except (TypeError, ValueError):
+                params = {}
+            self._slave_kwarg = "device_id" if "device_id" in params else "slave"
+        return self._slave_kwarg
+
     async def _async_update_data(self) -> dict[str, int]:
         client = await self._async_client()
         data: dict[str, int] = {}
+
+        slave_kw = self._slave_kw(client)
 
         for (reg_type, address), reg in self._physical_registers:
             try:
                 if reg_type is RegType.INPUT:
                     result = await client.read_input_registers(
-                        address=address, count=1, slave=self._unit_id
+                        address=address, count=1, **{slave_kw: self._unit_id}
                     )
                 else:
                     result = await client.read_holding_registers(
-                        address=address, count=1, slave=self._unit_id
+                        address=address, count=1, **{slave_kw: self._unit_id}
                     )
             except Exception as err:  # noqa: BLE001 - surfaced via UpdateFailed
                 raise UpdateFailed(
@@ -149,7 +171,9 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
         else:
             raw = int(value)
 
-        result = await client.write_register(address=reg.address, value=raw, slave=self._unit_id)
+        result = await client.write_register(
+            address=reg.address, value=raw, **{self._slave_kw(client): self._unit_id}
+        )
         if result is None or result.isError():
             raise UniProModbusError(f"Write to register {reg.register} failed: {result}")
 
