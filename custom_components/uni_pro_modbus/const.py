@@ -33,6 +33,10 @@ DOMAIN = "uni_pro_modbus"
 DEFAULT_PORT = 502
 DEFAULT_UNIT_ID = 1
 DEFAULT_SCAN_INTERVAL = 30  # seconds
+# Matches the bridge firmware's mDNS hostname (see uni_pro_bridge.ino /
+# MDNS_HOSTNAME) so the field is pre-filled with a value that works for
+# most customers out of the box, without needing to look up an IP.
+DEFAULT_HOST = "uni-pro-bridge.local"
 DEFAULT_TIMEOUT = 3  # seconds (bridge <-> integration, TCP). The controller's own
 # Modbus RTU timeout must be set to >= 500 ms on the bridge/gateway side.
 

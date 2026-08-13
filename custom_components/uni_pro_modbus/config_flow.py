@@ -16,6 +16,7 @@ from .const import (
     CONF_DHW,
     CONF_SCAN_INTERVAL,
     CONF_UNIT_ID,
+    DEFAULT_HOST,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_UNIT_ID,
@@ -83,7 +84,7 @@ class UniProModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         schema = vol.Schema(
             {
-                vol.Required(CONF_HOST): str,
+                vol.Required(CONF_HOST, default=DEFAULT_HOST): str,
                 vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
                 vol.Required(CONF_UNIT_ID, default=DEFAULT_UNIT_ID): vol.All(
                     int, vol.Range(min=1, max=247)
