@@ -1,4 +1,10 @@
+<p align="center">
+  <img src="brand_assets/logo_portrait.png" alt="Kaiser Electronics" width="180">
+</p>
+
 # UNI PRO Modbus (Home Assistant custom integration)
+
+Built and maintained by [Kaiser Electronics](https://github.com/LAZGAZ82).
 
 Home Assistant integration for **UNI2 PRO** and **UNI3 PRO** heating
 controllers, talked to over **Modbus TCP** via a generic RTU↔TCP bridge
