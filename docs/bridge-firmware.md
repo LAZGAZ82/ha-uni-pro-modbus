@@ -73,6 +73,42 @@ a firmware re-flash per customer device, instead of a single centrally
 updated HACS integration. Worth reconsidering only if the product
 direction shifts away from "one integration, many bridges."
 
+## Confirmed field issue: RS485 A/B must be crossed
+
+Real-hardware debugging session (UNI3 PRO + Waveshare ESP32-S3-RS485-CAN,
+SP3485EN transceiver) found that a straight A→A / B→B wire between bridge
+and controller produces **zero response**, even though every other part of
+the chain is correct. Full diagnostic trail, in case this needs
+re-verifying on a different controller/bridge combo:
+
+1. Software/eModbus ruled out with a standalone sketch that bypasses
+   `ModbusBridgeWiFi` entirely and sends raw Modbus RTU frames directly on
+   `Serial1` — confirmed the real bridge firmware's `onDataHandler`/
+   `onErrorHandler` never fire when `ModbusClientRTU` is driven as a bridge
+   backend (that's a diagnostic dead-end, not a bug worth fixing — just
+   don't rely on those handlers for debugging bridge traffic).
+2. All 4 combinations of TX/RX pin swap × EN polarity tested with the
+   standalone sketch — none produced a response, ruling out pin mapping
+   and EN/DE polarity assumptions.
+3. Confirmed via the official Waveshare schematic PDF that GPIO17→DI,
+   GPIO18←RO, GPIO21→DE/RE (SP3485EN, manual direction control, *not*
+   hardware auto-direction despite some marketing copy suggesting
+   otherwise) — so the firmware's pin constants were correct all along.
+4. Multimeter test (static DC levels, no UART toggling) on A/B confirmed
+   the bridge's driver output is healthy: EN=HIGH + TX=LOW → −3.3V,
+   EN=HIGH + TX=HIGH → +3.3V — a clean, correct differential swing that
+   tracks the data bit. This ruled out a defective transceiver.
+5. Confirmed the controller's Slave ID (`1`) and Modbus RTU enable via its
+   own on-screen settings — both correct.
+6. Crossing A/B (bridge A+ → controller B, bridge B- → controller A)
+   fixed it immediately; the straight/mirrored connection never worked no
+   matter what else was tried.
+
+**Takeaway for future bridge-doesn't-respond cases:** verify the physical
+transmit signal is healthy (multimeter static test above) before
+suspecting firmware or the transceiver chip — and try crossing A/B early,
+it's a 30-second change that resolved a multi-hour debugging session here.
+
 ## Testing the bridge before wiring up the UNI PRO
 
 Any standard Modbus TCP tool (e.g. `pymodbus.console`, `mbpoll`,
