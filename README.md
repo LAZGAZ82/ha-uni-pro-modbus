@@ -93,6 +93,22 @@ You'll need:
 The integration polls once every 30 seconds by default (adjustable in
 Settings → Devices & Services → UNI PRO Modbus → Configure).
 
+### RS485 wiring — A/B must be crossed
+
+On real hardware (confirmed on a UNI3 PRO unit, RS485 bridge = Waveshare
+ESP32-S3-RS485-CAN), a straight A→A / B→B connection between the bridge
+and the controller did **not** work — the bridge sent valid, correctly
+formed Modbus RTU requests (confirmed with a multimeter and a
+bridge-independent raw-frame test), but the controller never answered.
+Swapping to a **crossed** connection (bridge A+ → controller B, bridge B-
+→ controller A) fixed it immediately and communication has been reliable
+since. If a customer reports "bridge unreachable / no response from
+controller" after otherwise-correct setup (common ground present, correct
+Slave ID, Modbus RTU enabled on the controller), try crossing A/B **before**
+suspecting hardware — this is now the first thing to check. Some UNI3 PRO
+units also expose two A/B terminal pairs; if the first pair doesn't work,
+try the other one as well as crossing polarity.
+
 ## Development / packaging notes for maintainers
 
 - `custom_components/uni_pro_modbus/const.py` holds the full register map
