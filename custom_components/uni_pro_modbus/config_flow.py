@@ -10,6 +10,7 @@ from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import config_validation as cv
 
 from .const import (
     CONF_CIRCUITS,
@@ -139,9 +140,7 @@ class UniProModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         circuit_options = {str(i): f"CO{i}" for i in range(1, MAX_CIRCUITS + 1)}
         schema_dict: dict[Any, Any] = {
-            vol.Required(CONF_CIRCUITS, default=["1"]): vol.All(
-                [vol.In(circuit_options)],
-            ),
+            vol.Required(CONF_CIRCUITS, default=["1"]): cv.multi_select(circuit_options),
         }
         if supports_dhw_circ:
             schema_dict[vol.Required(CONF_DHW, default=False)] = bool
@@ -186,7 +185,7 @@ class UniProModbusOptionsFlow(config_entries.OptionsFlow):
             vol.Required(
                 CONF_CIRCUITS,
                 default=[str(i) for i in current.get(CONF_CIRCUITS, [1])],
-            ): vol.All([vol.In(circuit_options)]),
+            ): cv.multi_select(circuit_options),
             vol.Required(
                 CONF_SCAN_INTERVAL, default=current.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
             ): vol.All(int, vol.Range(min=5, max=600)),
