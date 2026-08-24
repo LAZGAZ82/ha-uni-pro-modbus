@@ -1,12 +1,12 @@
 {
-  "domain": "uni_pro_modbus",
-  "name": "UNI PRO Modbus (RS485 bridge)",
-  "codeowners": ["@LAZGAZ82"],
-  "config_flow": true,
-  "documentation": "https://github.com/LAZGAZ82/ha-uni-pro-modbus",
-  "issue_tracker": "https://github.com/LAZGAZ82/ha-uni-pro-modbus/issues",
-  "integration_type": "hub",
-  "iot_class": "local_polling",
-  "requirements": ["pymodbus>=3.6.0"],
-  "version": "0.1.3"
+    "domain": "uni_pro_modbus",
+    "name": "UNI PRO Modbus (RS485 bridge)",
+    "codeowners": ["@LAZGAZ82"],
+    "config_flow": true,
+    "documentation": "https://github.com/LAZGAZ82/ha-uni-pro-modbus",
+    "issue_tracker": "https://github.com/LAZGAZ82/ha-uni-pro-modbus/issues",
+    "integration_type": "hub",
+    "iot_class": "local_polling",
+    "requirements": ["pymodbus>=3.6.0"],
+    "version": "0.1.4"
 }
