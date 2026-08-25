@@ -109,6 +109,22 @@ suspecting hardware — this is now the first thing to check. Some UNI3 PRO
 units also expose two A/B terminal pairs; if the first pair doesn't work,
 try the other one as well as crossing polarity.
 
+## Dashboard
+
+As soon as the integration is added, Home Assistant automatically shows a
+device page (Settings → Devices & Services → UNI PRO Modbus) with the
+Kaiser Electronics logo, manufacturer/model, and every sensor/control
+grouped together — no setup required.
+
+For a curated, single-page overview dashboard (grouped by heating circuit,
+with the logo as a header), see
+[`docs/dashboard_example.yaml`](docs/dashboard_example.yaml). Home
+Assistant does not allow integrations to install dashboards automatically,
+so this is a ready-to-paste template: replace the `UNIPRO_PREFIX`
+placeholder with your installation's actual entity prefix (instructions are
+in the file itself), then import it via Settings → Dashboards → Add
+Dashboard → Raw configuration editor.
+
 ## Development / packaging notes for maintainers
 
 - `custom_components/uni_pro_modbus/const.py` holds the full register map

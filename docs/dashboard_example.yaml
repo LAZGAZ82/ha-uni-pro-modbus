@@ -1,0 +1,275 @@
+##############################################################################
+# Kaiser Electronics – UNI PRO Modbus – Beispiel-Dashboard
+#
+# Das ist ein OPTIONALES, fertiges Lovelace-Dashboard für die Integration
+# "UNI PRO Modbus". Home Assistant erlaubt es Integrationen nicht, ein
+# Dashboard automatisch beim Kunden einzurichten - deshalb hier die
+# Vorlage zum einmaligen Kopieren.
+#
+# ── SCHRITT 1: Entity-Präfix herausfinden und ersetzen ─────────────────────
+#
+#   Jede entity_id unten beginnt mit dem Platzhalter UNIPRO_PREFIX, z. B.
+#       sensor.UNIPRO_PREFIX_outside_temperature
+#
+#   So findest du deinen echten Präfix:
+#     1. Entwicklerwerkzeuge → Zustände
+#     2. Oben nach "outside_temperature" suchen
+#     3. Die gefundene entity_id kopieren, z. B.
+#          sensor.uni3_pro_192_168_1_154_outside_temperature
+#        → dein Präfix ist   uni3_pro_192_168_1_154
+#     4. In einem Texteditor (z. B. Editor auf dem PC, oder direkt im
+#        HA-Raw-Editor) ALLE Vorkommen von UNIPRO_PREFIX durch deinen
+#        Präfix ersetzen, bevor du diese Datei einfügst.
+#
+# ── SCHRITT 2: Nicht genutzte Abschnitte entfernen ──────────────────────────
+#
+#   - Lösche die Abschnitte "Heizkreis CO2" bis "CO7" für jeden Heizkreis,
+#     den du beim Einrichten der Integration NICHT ausgewählt hast.
+#   - Lösche die Abschnitte "Warmwasser (DHW)" und "Zirkulation", falls du
+#     ein UNI3 PRO hast oder diese Funktionen nicht aktiviert hast (UNI3 PRO
+#     unterstützt DHW/Zirkulation grundsätzlich nicht).
+#
+# ── SCHRITT 3: Importieren ──────────────────────────────────────────────────
+#
+#   Einstellungen → Dashboards → Dashboard hinzufügen → "Neues Dashboard
+#   von Grund auf" → Namen vergeben → öffnen → Drei-Punkte-Menü (oben
+#   rechts) → Dashboard bearbeiten → Drei-Punkte-Menü erneut →
+#   "Im YAML bearbeiten" ("Raw configuration editor") → vorhandenen Inhalt
+#   löschen → diese Datei einfügen → Speichern.
+##############################################################################
+
+title: Kaiser Electronics – UNI PRO Modbus
+views:
+  - title: UNI PRO Modbus
+    path: uni-pro-modbus
+    icon: mdi:radiator
+    cards:
+      - type: markdown
+        content: >
+          <div style="text-align:center">
+
+          <img src="https://brands.home-assistant.io/_/uni_pro_modbus/logo.png"
+          alt="Kaiser Electronics" style="max-height:64px;margin-bottom:4px">
+
+
+          ### {{ device_attr('sensor.UNIPRO_PREFIX_outside_temperature', 'model') }}
+
+          </div>
+
+      - type: glance
+        title: Allgemeiner Status
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_alarm
+            name: Alarm
+          - entity: binary_sensor.UNIPRO_PREFIX_boiler_relay_k1
+            name: Kesselrelais
+          - entity: sensor.UNIPRO_PREFIX_outside_temperature
+            name: Außentemperatur
+          - entity: sensor.UNIPRO_PREFIX_supply_temperature_sensor_1
+            name: Vorlauf 1
+          - entity: sensor.UNIPRO_PREFIX_supply_temperature_sensor_2
+            name: Vorlauf 2
+
+      - type: entities
+        title: Heizungssaison
+        show_header_toggle: false
+        entities:
+          - entity: select.UNIPRO_PREFIX_heating_season_mode
+            name: Modus
+          - entity: number.UNIPRO_PREFIX_heating_season_start_temperature
+            name: Start-Temperatur
+          - entity: number.UNIPRO_PREFIX_heating_season_end_temperature
+            name: End-Temperatur
+
+      # ── Heizkreis CO1 ─────────────────────────────────────────────────
+      - type: entities
+        title: Heizkreis CO1
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_co1_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_co1_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_co1_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_co1_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_co1_room_input_closed
+            name: Raumeingang
+          - entity: binary_sensor.UNIPRO_PREFIX_co1_sensor_error
+            name: Fühlerfehler
+
+      # ── Heizkreis CO2 (löschen, falls nicht genutzt) ─────────────────
+      - type: entities
+        title: Heizkreis CO2
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_co2_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_co2_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_co2_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_co2_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_co2_room_input_closed
+            name: Raumeingang
+          - entity: binary_sensor.UNIPRO_PREFIX_co2_sensor_error
+            name: Fühlerfehler
+
+      # ── Heizkreis CO3 (löschen, falls nicht genutzt) ─────────────────
+      - type: entities
+        title: Heizkreis CO3
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_co3_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_co3_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_co3_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_co3_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_co3_room_input_closed
+            name: Raumeingang
+          - entity: binary_sensor.UNIPRO_PREFIX_co3_sensor_error
+            name: Fühlerfehler
+
+      # ── Heizkreis CO4 (löschen, falls nicht genutzt) ─────────────────
+      - type: entities
+        title: Heizkreis CO4
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_co4_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_co4_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_co4_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_co4_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_co4_room_input_closed
+            name: Raumeingang
+          - entity: binary_sensor.UNIPRO_PREFIX_co4_sensor_error
+            name: Fühlerfehler
+
+      # ── Heizkreis CO5 (löschen, falls nicht genutzt) ─────────────────
+      - type: entities
+        title: Heizkreis CO5
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_co5_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_co5_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_co5_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_co5_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_co5_room_input_closed
+            name: Raumeingang
+          - entity: binary_sensor.UNIPRO_PREFIX_co5_sensor_error
+            name: Fühlerfehler
+
+      # ── Heizkreis CO6 (löschen, falls nicht genutzt) ─────────────────
+      - type: entities
+        title: Heizkreis CO6
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_co6_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_co6_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_co6_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_co6_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_co6_room_input_closed
+            name: Raumeingang
+          - entity: binary_sensor.UNIPRO_PREFIX_co6_sensor_error
+            name: Fühlerfehler
+
+      # ── Heizkreis CO7 (löschen, falls nicht genutzt) ─────────────────
+      - type: entities
+        title: Heizkreis CO7
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_co7_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_co7_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_co7_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_co7_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_co7_room_input_closed
+            name: Raumeingang
+          - entity: binary_sensor.UNIPRO_PREFIX_co7_sensor_error
+            name: Fühlerfehler
+
+      # ── Warmwasser / DHW (nur UNI2 PRO, löschen falls nicht genutzt) ──
+      - type: entities
+        title: Warmwasser (DHW)
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_dhw_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_dhw_temperature
+            name: Temperatur
+          - entity: number.UNIPRO_PREFIX_dhw_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_dhw_pump
+            name: Pumpe
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection
+            name: Desinfektion
+          - entity: binary_sensor.UNIPRO_PREFIX_dhw_sensor_error
+            name: Fühlerfehler
+
+      # ── Zirkulation (nur UNI2 PRO, löschen falls nicht genutzt) ───────
+      - type: entities
+        title: Zirkulation
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_circulation_circuit_enabled
+            name: Aktiviert
+          - entity: sensor.UNIPRO_PREFIX_circulation_temperature
+            name: Temperatur
+          - entity: select.UNIPRO_PREFIX_circulation_control_mode
+            name: Regelungsart
+          - entity: number.UNIPRO_PREFIX_circulation_set_temperature
+            name: Solltemperatur
+          - entity: binary_sensor.UNIPRO_PREFIX_circulation_pump
+            name: Pumpe
+          - entity: binary_sensor.UNIPRO_PREFIX_circulation_sensor_error
+            name: Fühlerfehler
+
+      # ── Diagnose / Fühlerfehler ────────────────────────────────────────
+      - type: entities
+        title: Diagnose
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.UNIPRO_PREFIX_eco_input_active
+            name: ECO-Eingang aktiv
+          - entity: binary_sensor.UNIPRO_PREFIX_season_entry_active
+            name: Saisoneingang aktiv
+          - entity: binary_sensor.UNIPRO_PREFIX_buffer_pump
+            name: Pufferpumpe (nur UNI2 PRO)
+          - entity: binary_sensor.UNIPRO_PREFIX_power_sensor_1_short_circuit
+            name: Fühler 1 Kurzschluss
+          - entity: binary_sensor.UNIPRO_PREFIX_power_sensor_1_open_circuit
+            name: Fühler 1 Unterbrechung
+          - entity: binary_sensor.UNIPRO_PREFIX_power_sensor_2_short_circuit
+            name: Fühler 2 Kurzschluss
+          - entity: binary_sensor.UNIPRO_PREFIX_power_sensor_2_open_circuit
+            name: Fühler 2 Unterbrechung
+          - entity: binary_sensor.UNIPRO_PREFIX_external_sensor_short_circuit
+            name: Externer Fühler Kurzschluss
+          - entity: binary_sensor.UNIPRO_PREFIX_external_sensor_open_circuit
+            name: Externer Fühler Unterbrechung
+
+# Hinweis: Feineinstellungen wie Heizkurvenpunkte (-20°C/-5°C/+5°C/+15°C)
+# und Zeiten für die Kurzzeitanhebung sind bewusst nicht in diesem
+# Übersichts-Dashboard enthalten. Sie lassen sich bei Bedarf über
+# "Karte hinzufügen" → Entität suchen direkt in Home Assistant ergänzen,
+# oder sind auf der automatischen Geräteseite (Einstellungen → Geräte &
+# Dienste → UNI PRO Modbus → Gerät) bereits vollständig vorhanden.

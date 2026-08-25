@@ -47,7 +47,7 @@ CONF_DHW = "dhw"
 CONF_CIRCULATION = "circulation"
 CONF_SCAN_INTERVAL = "scan_interval"
 
-MANUFACTURER = "manufacturer (UNI PRO)"
+MANUFACTURER = "Kaiser Electronics"
 
 
 class Model(str, Enum):

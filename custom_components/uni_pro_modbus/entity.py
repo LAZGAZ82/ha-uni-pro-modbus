@@ -4,7 +4,7 @@ from __future__ import annotations
 from homeassistant.helpers.entity import DeviceInfo, EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, RegisterDef
+from .const import DOMAIN, MANUFACTURER, RegisterDef
 from .coordinator import UniProModbusCoordinator
 
 _ENTITY_CATEGORY_MAP = {
@@ -37,7 +37,7 @@ class UniProModbusEntity(CoordinatorEntity[UniProModbusCoordinator]):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry_id)},
             name=device_name,
-            manufacturer="UNI PRO",
+            manufacturer=MANUFACTURER,
             model=model_label,
         )
 
