@@ -64,6 +64,15 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
   itself warns addressing "may differ by 1 depending on the software
   used" — re-confirm with a real device on first hardware bring-up.
 
+## Einrichtung / Installation
+
+Deutsche Schritt-für-Schritt-Anleitung aus den Feldtests (Verdrahtung
+inkl. GND und 120R-Terminierung, Modbus am Regler aktivieren, Bridge-WLAN,
+HACS, Einrichtung in HA, Fehlerbehebung):
+**[docs/einrichtung-home-assistant.md](docs/einrichtung-home-assistant.md)**
+
+The English quick reference follows below.
+
 ## Installation
 
 ### Via HACS (recommended once this repo is on GitHub)
