@@ -71,6 +71,10 @@ inkl. GND und 120R-Terminierung, Modbus am Regler aktivieren, Bridge-WLAN,
 HACS, Einrichtung in HA, Fehlerbehebung):
 **[docs/einrichtung-home-assistant.md](docs/einrichtung-home-assistant.md)**
 
+Komplettanleitung für Endkunden (Bridge, Verdrahtung, Regler, Home
+Assistant, Fehlerbehebung) als PDF:
+**[docs/Anleitung_UNI3-PRO_Komplett_v3.1.pdf](docs/Anleitung_UNI3-PRO_Komplett_v3.1.pdf)**
+
 The English quick reference follows below.
 
 ## Installation

@@ -45,7 +45,7 @@ Weitergabe an Kunden (oder eigenes Serienflashen) alles zu einer Datei mergen:
 
 ```bash
 cd .pio/build/unipro_bridge
-python -m esptool --chip esp32s3 merge_bin -o unipro-bridge-v1.0.0-full.bin \
+python -m esptool --chip esp32s3 merge_bin -o unipro-bridge-v1.0.1-full.bin \
   0x0000 bootloader.bin \
   0x8000 partitions.bin \
   0x10000 firmware.bin
@@ -54,7 +54,7 @@ python -m esptool --chip esp32s3 merge_bin -o unipro-bridge-v1.0.0-full.bin \
 Flashen der Gesamtdatei (auch beim Kunden-Flash-Service):
 
 ```bash
-python -m esptool --chip esp32s3 --port /dev/ttyACM0 write_flash 0x0 unipro-bridge-v1.0.0-full.bin
+python -m esptool --chip esp32s3 --port /dev/ttyACM0 write_flash 0x0 unipro-bridge-v1.0.1-full.bin
 ```
 
 `esptool` kommt mit PlatformIO mit, sonst: `pip install esptool`.
