@@ -35,7 +35,7 @@
  *   BOOT-Taste (GPIO0) im laufenden Betrieb ca. 5 Sekunden gedrueckt halten.
  *
  * Lizenz: MIT (siehe LICENSE im Integrations-Repo)
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 
 #include <Arduino.h>
@@ -103,7 +103,7 @@ void setup() {
   Serial.begin(115200);
   delay(200);
   Serial.println();
-  Serial.println(F("=== UNI PRO Modbus Bridge v1.0.0 ==="));
+  Serial.println(F("=== UNI PRO Modbus Bridge v1.0.1 ==="));
 
   pinMode(PIN_BOOT_BTN, INPUT_PULLUP);
 

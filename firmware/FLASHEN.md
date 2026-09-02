@@ -31,6 +31,13 @@ erhalten das Geraet fertig geflasht oder fordern die fertige Flash-Datei an.
    Erwartete Ausgabe: Versionsbanner, WLAN-Status bzw. Hotspot-Start, mDNS- und
    Modbus-Meldung.
 
+   Hinweis: Das Board meldet sich ueber das native USB des ESP32-S3 (USB-CDC,
+   VID:PID 303A:1001). Die dafuer noetigen Build-Flags (ARDUINO_USB_MODE=1,
+   ARDUINO_USB_CDC_ON_BOOT=1) sind in der platformio.ini gesetzt - ohne sie
+   laeuft die Ausgabe auf UART0 (GPIO43/44) und der Monitor bleibt leer. Das
+   Banner erscheint beim Start: nach dem Oeffnen des Monitors einmal RESET am
+   Board druecken, um es erneut zu sehen.
+
 ## Fertige Flash-Datei fuer den Versand erzeugen (eine einzige .bin)
 
 PlatformIO erzeugt Bootloader, Partitionstabelle und Anwendung getrennt. Fuer die
