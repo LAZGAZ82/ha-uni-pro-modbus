@@ -32,6 +32,9 @@ pio device monitor -b 115200
 - Board meldet sich als USB-CDC (VID:PID `303A:1001`)
 - Details: `firmware/FLASHEN.md`
 
+## Test-Werkzeuge
+- `firmware/tools/` – Python-Skripte (pymodbus) und ESP32-Rohtest aus der Inbetriebnahme: RTU-Slave-Simulator, TCP-Einzel-/Dauertest, RTU-Direkttest, Adapter-Echo, RS485-Rohtest. Einsatzreihenfolge in `firmware/tools/README.md`.
+
 ## Dokumentation
 - `docs/einrichtung-home-assistant.md` – Schritt-für-Schritt-Einrichtung in HA (Feldtest-Erkenntnisse)
 - `docs/Anleitung_UNI3-PRO_Komplett_v3.1.pdf` – Komplettanleitung v3.1
