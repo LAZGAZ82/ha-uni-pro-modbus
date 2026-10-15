@@ -84,6 +84,8 @@ class DataType(str, Enum):
     UINT16 = "uint16"
     BIT = "bit"  # single bit out of a 16-bit bitfield register
     ENUM16 = "enum16"
+    UINT8_HIGH = "uint8_high"  # high byte of a 16-bit register (e.g. month in packed month/day)
+    UINT8_LOW = "uint8_low"  # low byte of a 16-bit register (e.g. day in packed month/day)
 
 
 @dataclass(frozen=True)
@@ -102,6 +104,9 @@ class RegisterDef:
     device_class: str | None = None
     icon: str | None = None
     entity_category: str | None = None  # "diagnostic" | "config" | None
+    native_min: float | None = None  # optional number min/max/step overrides
+    native_max: float | None = None
+    native_step: float | None = None
 
     @property
     def base(self) -> int:
@@ -170,11 +175,30 @@ GENERAL_CONFIG: list[RegisterDef] = [
     RegisterDef("heating_season_end_temp", "Heating season end temperature", 40005,
                 RegType.HOLDING, DataType.INT16_X10, writable=True, unit="°C",
                 device_class="temperature", entity_category="config"),
+    # Heating season start/end *date*: register 40002 (start) and 40003 (end)
+    # each pack the date into one 16-bit register as two bytes. Byte order is
+    # CONFIRMED by the manual (v0.3 / 14-05-2026): "Byte HI (older): month
+    # (1-12), Byte LO (younger): day (1-31)" -> high byte = month, low byte =
+    # day, exactly as mapped below (UINT8_HIGH = month, UINT8_LOW = day).
+    # Writes go through a read-modify-write (see coordinator.async_write) so
+    # setting one half preserves the other.
+    RegisterDef("heating_season_start_month", "Heating season start month", 40002,
+                RegType.HOLDING, DataType.UINT8_HIGH, writable=True, native_min=1,
+                native_max=12, native_step=1, entity_category="config",
+                icon="mdi:calendar-start"),
+    RegisterDef("heating_season_start_day", "Heating season start day", 40002,
+                RegType.HOLDING, DataType.UINT8_LOW, writable=True, native_min=1,
+                native_max=31, native_step=1, entity_category="config",
+                icon="mdi:calendar-start"),
+    RegisterDef("heating_season_end_month", "Heating season end month", 40003,
+                RegType.HOLDING, DataType.UINT8_HIGH, writable=True, native_min=1,
+                native_max=12, native_step=1, entity_category="config",
+                icon="mdi:calendar-end"),
+    RegisterDef("heating_season_end_day", "Heating season end day", 40003,
+                RegType.HOLDING, DataType.UINT8_LOW, writable=True, native_min=1,
+                native_max=31, native_step=1, entity_category="config",
+                icon="mdi:calendar-end"),
 ]
-# NOTE: heating season start/end *date* registers (40002/40003) are packed as
-# two bytes (month/day) in one 16-bit register. Not exposed as entities in v1
-# - would need a dedicated date-pair number pair or a text platform. Left as
-# a follow-up; see README "Roadmap".
 
 # ---------------------------------------------------------------------------
 # Per-circuit (CO1..CO7) register template

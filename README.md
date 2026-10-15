@@ -44,7 +44,7 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
   - **binary_sensor**: alarm, pump running, sensor faults, room input,
     circuit enabled/disabled status (read-only per the device's own spec)
   - **number**: set temperatures, weather-curve points, timed-activation
-    duration/temperature
+    duration/temperature, heating season start/end date (month/day)
   - **select**: heating season mode, circulation control mode
   - **switch**: DHW disinfection
 - **Weekly schedules** (CO1-CO7, DHW, Circulation) are readable and

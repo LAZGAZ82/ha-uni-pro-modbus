@@ -173,6 +173,10 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
             return round(signed / 10, 1)
         if reg.data_type is DataType.UINT16:
             return raw
+        if reg.data_type is DataType.UINT8_HIGH:
+            return (raw >> 8) & 0xFF
+        if reg.data_type is DataType.UINT8_LOW:
+            return raw & 0xFF
         if reg.data_type is DataType.ENUM16:
             return (reg.options or {}).get(raw, str(raw))
         return raw
@@ -226,6 +230,15 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
                 raw += 0x10000
         elif reg.data_type is DataType.UINT16:
             raw = int(value)
+        elif reg.data_type in (DataType.UINT8_HIGH, DataType.UINT8_LOW):
+            # Packed month/day: preserve the other byte of the register by
+            # reading the last cached value and overwriting only our half.
+            current = self.get_raw(reg) or 0
+            byte_val = int(value) & 0xFF
+            if reg.data_type is DataType.UINT8_HIGH:
+                raw = (byte_val << 8) | (current & 0x00FF)
+            else:
+                raw = (current & 0xFF00) | byte_val
         elif reg.data_type is DataType.ENUM16:
             reverse = {v: k for k, v in (reg.options or {}).items()}
             raw = reverse.get(value, value)
