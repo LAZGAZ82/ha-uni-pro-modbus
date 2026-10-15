@@ -220,10 +220,19 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
         client = await self._async_client()
 
         if reg.data_type is DataType.BIT:
-            # Registers exposing individual writable bits (disinfection,
-            # control mode) are documented as single-purpose bit registers
-            # in this integration's scope - write the whole register.
-            raw = 1 if value else 0
+            # Read-modify-write the single bit so that registers packing
+            # several writable bits (e.g. the DHW disinfection weekday mask at
+            # 40806) keep their other bits intact. For single-purpose bit
+            # registers (e.g. disinfection on/off at 40802) this is equivalent
+            # to writing the whole register. Falls back to 0 if the register
+            # has not been polled yet.
+            current = self.get_raw(reg) or 0
+            bit = reg.bit or 0
+            if value:
+                raw = current | (1 << bit)
+            else:
+                raw = current & ~(1 << bit)
+            raw &= 0xFFFF
         elif reg.data_type is DataType.INT16_X10:
             raw = int(round(float(value) * 10))
             if raw < 0:

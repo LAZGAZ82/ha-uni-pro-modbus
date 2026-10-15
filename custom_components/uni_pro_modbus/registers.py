@@ -9,14 +9,17 @@ from .const import (
     CIRC_ENABLED,
     CIRC_SCHEDULE,
     CIRC_SENSOR_ERROR,
+    CIRC_SENSOR_ERROR_OPEN,
     CIRC_SETPOINT_TEMP,
     CIRC_STATUS,
     CIRC_TEMP_ACTIVATION_MINUTES,
     CIRC_TEMPERATURE,
     DHW_DISINFECTION,
+    DHW_DISINFECTION_DAYS,
     DHW_ENABLED,
     DHW_SCHEDULE,
     DHW_SENSOR_ERROR,
+    DHW_SENSOR_ERROR_OPEN,
     DHW_SET_TEMP,
     DHW_STATUS,
     DHW_TEMP_ACTIVATION_MINUTES,
@@ -59,7 +62,6 @@ class ActiveRegisters:
         for circuit in self.circuits:
             defs.extend(
                 [
-                    circuit.status,
                     circuit.temperature,
                     circuit.enabled,
                     circuit.set_temp,
@@ -72,6 +74,7 @@ class ActiveRegisters:
                     circuit.pump_bit,
                     circuit.room_input_bit,
                     circuit.sensor_error_bit,
+                    circuit.sensor_error_open_bit,
                 ]
             )
 
@@ -80,9 +83,11 @@ class ActiveRegisters:
                 [
                     DHW_STATUS,
                     DHW_SENSOR_ERROR,
+                    DHW_SENSOR_ERROR_OPEN,
                     DHW_TEMPERATURE,
                     DHW_ENABLED,
                     DHW_DISINFECTION,
+                    *DHW_DISINFECTION_DAYS,
                     DHW_SET_TEMP,
                     DHW_TEMP_ACTIVATION_MINUTES,
                     DHW_TEMP_ACTIVATION_TEMP,
@@ -94,6 +99,7 @@ class ActiveRegisters:
                 [
                     CIRC_STATUS,
                     CIRC_SENSOR_ERROR,
+                    CIRC_SENSOR_ERROR_OPEN,
                     CIRC_TEMPERATURE,
                     CIRC_ENABLED,
                     CIRC_CONTROL_MODE,

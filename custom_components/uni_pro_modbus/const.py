@@ -216,7 +216,6 @@ CIRCUIT_STEP = 100
 @dataclass(frozen=True)
 class CircuitRegisters:
     index: int  # 1..7
-    status: RegisterDef
     temperature: RegisterDef
     enabled: RegisterDef
     set_temp: RegisterDef
@@ -229,6 +228,7 @@ class CircuitRegisters:
     pump_bit: RegisterDef
     room_input_bit: RegisterDef
     sensor_error_bit: RegisterDef
+    sensor_error_open_bit: RegisterDef
 
 
 def build_circuit(index: int) -> CircuitRegisters:
@@ -253,8 +253,6 @@ def build_circuit(index: int) -> CircuitRegisters:
 
     return CircuitRegisters(
         index=index,
-        status=RegisterDef(f"{prefix}_status_raw", f"{label} status", in_status, RegType.INPUT,
-                            DataType.BIT, bit=0),
         temperature=RegisterDef(f"{prefix}_temperature", f"{label} temperature", in_temp,
                                  RegType.INPUT, DataType.INT16_X10, unit="°C",
                                  device_class="temperature"),
@@ -293,9 +291,13 @@ def build_circuit(index: int) -> CircuitRegisters:
                               DataType.BIT, bit=0, device_class="running"),
         room_input_bit=RegisterDef(f"{prefix}_room_input", f"{label} room input closed",
                                     in_status, RegType.INPUT, DataType.BIT, bit=1),
-        sensor_error_bit=RegisterDef(f"{prefix}_sensor_error", f"{label} sensor error",
+        sensor_error_bit=RegisterDef(f"{prefix}_sensor_error", f"{label} sensor error (short circuit)",
                                       in_status, RegType.INPUT, DataType.BIT, bit=2,
                                       device_class="problem", entity_category="diagnostic"),
+        sensor_error_open_bit=RegisterDef(f"{prefix}_sensor_error_open",
+                                           f"{label} sensor error (open circuit)",
+                                           in_status, RegType.INPUT, DataType.BIT, bit=3,
+                                           device_class="problem", entity_category="diagnostic"),
     )
 
 
@@ -305,9 +307,12 @@ def build_circuit(index: int) -> CircuitRegisters:
 
 DHW_STATUS = RegisterDef("dhw_pump", "DHW pump", 30801, RegType.INPUT, DataType.BIT, bit=0,
                           device_class="running")
-DHW_SENSOR_ERROR = RegisterDef("dhw_sensor_error", "DHW sensor error", 30801, RegType.INPUT,
-                                DataType.BIT, bit=2, device_class="problem",
+DHW_SENSOR_ERROR = RegisterDef("dhw_sensor_error", "DHW sensor error (short circuit)", 30801,
+                                RegType.INPUT, DataType.BIT, bit=2, device_class="problem",
                                 entity_category="diagnostic")
+DHW_SENSOR_ERROR_OPEN = RegisterDef("dhw_sensor_error_open", "DHW sensor error (open circuit)",
+                                     30801, RegType.INPUT, DataType.BIT, bit=3,
+                                     device_class="problem", entity_category="diagnostic")
 DHW_TEMPERATURE = RegisterDef("dhw_temperature", "DHW temperature", 30802, RegType.INPUT,
                                DataType.INT16_X10, unit="°C", device_class="temperature")
 DHW_ENABLED = RegisterDef("dhw_enabled", "DHW circuit enabled", 40801, RegType.HOLDING,
@@ -336,9 +341,14 @@ DHW_TEMP_ACTIVATION_TEMP = RegisterDef("dhw_temp_activation_temp",
 
 CIRC_STATUS = RegisterDef("circulation_pump", "Circulation pump", 30901, RegType.INPUT,
                            DataType.BIT, bit=0, device_class="running")
-CIRC_SENSOR_ERROR = RegisterDef("circulation_sensor_error", "Circulation sensor error", 30901,
+CIRC_SENSOR_ERROR = RegisterDef("circulation_sensor_error",
+                                 "Circulation sensor error (short circuit)", 30901,
                                  RegType.INPUT, DataType.BIT, bit=2, device_class="problem",
                                  entity_category="diagnostic")
+CIRC_SENSOR_ERROR_OPEN = RegisterDef("circulation_sensor_error_open",
+                                      "Circulation sensor error (open circuit)", 30901,
+                                      RegType.INPUT, DataType.BIT, bit=3, device_class="problem",
+                                      entity_category="diagnostic")
 CIRC_TEMPERATURE = RegisterDef("circulation_temperature", "Circulation temperature", 30902,
                                 RegType.INPUT, DataType.INT16_X10, unit="°C",
                                 device_class="temperature")
@@ -423,3 +433,27 @@ def build_circuit_schedule(index: int) -> ScheduleDef:
 
 DHW_SCHEDULE = ScheduleDef("dhw_schedule", "DHW schedule", 40820)
 CIRC_SCHEDULE = ScheduleDef("circulation_schedule", "Circulation schedule", 40920)
+
+# DHW disinfection weekly schedule: register 40806, "7 bits of the lower byte
+# (LO)" = one bit per weekday (manual, r/w via function 03/06). The manual does
+# not state which bit is which day, so the mapping below ASSUMES the same
+# Sunday-first order used by the hourly schedule block (SCHEDULE_DAYS): bit 0 =
+# Sunday ... bit 6 = Saturday. Verify on hardware (enable one weekday in the
+# controller UI, read 40806 back) and reorder DISINFECTION_DAY_BITS if needed.
+# Each bit is exposed as its own writable switch, matching the DHW disinfection
+# on/off switch above. Bit writes are read-modify-write (see coordinator) so
+# toggling one day preserves the others.
+DISINFECTION_DAY_BITS = list(enumerate(SCHEDULE_DAYS))  # [(0,"sunday"),...,(6,"saturday")]
+_DAY_TITLES = {
+    "sunday": "Sunday", "monday": "Monday", "tuesday": "Tuesday",
+    "wednesday": "Wednesday", "thursday": "Thursday", "friday": "Friday",
+    "saturday": "Saturday",
+}
+DHW_DISINFECTION_DAYS = [
+    RegisterDef(
+        f"dhw_disinfection_{day}", f"DHW disinfection {_DAY_TITLES[day]}", 40806,
+        RegType.HOLDING, DataType.BIT, bit=bit, writable=True,
+        icon="mdi:bacteria-outline", entity_category="config",
+    )
+    for bit, day in DISINFECTION_DAY_BITS
+]
