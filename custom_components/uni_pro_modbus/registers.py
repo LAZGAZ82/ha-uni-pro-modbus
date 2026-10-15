@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from .const import (
     CIRC_CONTROL_MODE,
     CIRC_ENABLED,
+    CIRC_SCHEDULE,
     CIRC_SENSOR_ERROR,
     CIRC_SETPOINT_TEMP,
     CIRC_STATUS,
@@ -14,6 +15,7 @@ from .const import (
     CIRC_TEMPERATURE,
     DHW_DISINFECTION,
     DHW_ENABLED,
+    DHW_SCHEDULE,
     DHW_SENSOR_ERROR,
     DHW_SET_TEMP,
     DHW_STATUS,
@@ -26,7 +28,9 @@ from .const import (
     CircuitRegisters,
     Model,
     RegisterDef,
+    ScheduleDef,
     build_circuit,
+    build_circuit_schedule,
 )
 
 
@@ -36,6 +40,18 @@ class ActiveRegisters:
     circuits: list[CircuitRegisters]
     dhw: bool
     circulation: bool
+
+    def all_schedules(self) -> list[ScheduleDef]:
+        """Weekly on/off schedules for every active loop (CO1-CO7, DHW,
+        Circulation)."""
+        scheds: list[ScheduleDef] = [
+            build_circuit_schedule(circuit.index) for circuit in self.circuits
+        ]
+        if self.dhw:
+            scheds.append(DHW_SCHEDULE)
+        if self.circulation:
+            scheds.append(CIRC_SCHEDULE)
+        return scheds
 
     def all_defs(self) -> list[RegisterDef]:
         defs: list[RegisterDef] = [*GENERAL_STATUS_BITS, *GENERAL_SENSORS, *GENERAL_CONFIG]

@@ -14,12 +14,14 @@ IMPORTANT / open items to verify against real hardware:
   the software used". The examples in the manual match the convention above,
   but re-check with function 04/03 reads against the actual device before
   relying on this in production.
-- The CO1 sub-register layout (set point, weather-curve points, timed
-  activation, schedule) is documented in full only for CO1. CO2-CO7 are
-  documented only as address ranges (see CIRCUIT_OFFSETS) with the same
-  span (40x01-40x30 / 30x01-30x02). This integration assumes the same
-  relative sub-offsets repeat for every circuit. Verify on hardware with
-  more than one active circuit before shipping to a customer with CO2+.
+- The per-circuit sub-register layout (set point, weather-curve points,
+  timed activation, schedule) is documented in full only for CO1. The
+  manual's address-offset table (page 2) documents the complete
+  40x01-40x30 / 30x01-30x02 span repeating for every circuit CO1-CO7 with a
+  fixed +100 offset (see CIRCUIT_INPUT_BASE / CIRCUIT_HOLDING_BASE /
+  CIRCUIT_STEP), so the relative sub-offsets are confirmed to be identical
+  per circuit. Still worth a spot-check on hardware with more than one active
+  circuit before relying on CO2+ in the field.
 - UNI2 PRO does not support CO3 circulation queries (see manual, page 2).
 - UNI3 PRO does not support DHW or Circulation queries at all.
 """
@@ -329,3 +331,71 @@ CIRC_TEMP_ACTIVATION_MINUTES = RegisterDef("circulation_temp_activation_minutes"
                                             "Circulation temporary activation duration", 40910,
                                             RegType.HOLDING, DataType.UINT16, writable=True,
                                             unit="min", entity_category="config")
+
+# ---------------------------------------------------------------------------
+# Weekly schedules (CO1..CO7, DHW, Circulation)
+# ---------------------------------------------------------------------------
+# Each schedule is a contiguous block of 11 holding registers (manual: CO1 at
+# 40120-40130, DHW at 40820-40830, Circulation at 40920-40930; per-circuit
+# schedules follow the same +100 offset table as the rest of the circuit, so
+# CO<n> starts at 40120 + 100*(n-1)).
+#
+# Encoding (confirmed by the two worked examples in the manual, v0.3):
+#   - 11 registers * 2 bytes = 22 bytes. Byte order within each register is
+#     HI (older) then LO (younger).
+#   - The first 21 bytes are meaningful: 7 days * 3 eight-hour blocks, in the
+#     order Sunday, Monday, ... Saturday; within a day the blocks are
+#     00:00-07:00, 08:00-15:00, 16:00-23:00.
+#   - Each block byte holds 8 bits = 8 hours; bit N (LSB first) = hour
+#     (block*8 + N), value 1 = active/on, 0 = inactive/off.
+#   - The 22nd byte (LO of the last register) is unused and always 0x00.
+# This is pure per-hour on/off; the manual defines NO per-slot comfort/setback
+# temperature for schedules. Writes use function 16 (write multiple holding
+# registers) only - function 06 is not offered for the schedule block.
+#
+# Manual example 1: reading the CO1 schedule "where all hours are active"
+#   -> 21x 0xFF + 0x00 (registers 0xFFFF .. 0xFF00).
+# Manual example 2: CO2 schedule "inactive every day at 6 o'clock"
+#   -> per day 0xBF 0xFF 0xFF (bit 6 of the 00:00-07:00 block cleared).
+
+SCHEDULE_REGISTER_COUNT = 11
+# A schedule's first register, relative to the loop's own holding base
+# (CIRCUIT_HOLDING_BASE / DHW 40801 / Circulation 40901): 40120-40101 = 19.
+SCHEDULE_OFFSET = 19
+# Day order as laid out in the register block (manual pages 4-7).
+SCHEDULE_DAYS = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+]
+
+
+@dataclass(frozen=True)
+class ScheduleDef:
+    """A weekly on/off schedule occupying SCHEDULE_REGISTER_COUNT holding
+    registers starting at `start_register` (documented register number)."""
+
+    key: str
+    name: str
+    start_register: int  # e.g. 40120 (CO1), 40820 (DHW), 40920 (Circulation)
+
+    @property
+    def address(self) -> int:
+        """Raw 0-based Modbus address of the first schedule register."""
+        return self.start_register - 40001
+
+
+def build_circuit_schedule(index: int) -> ScheduleDef:
+    """Schedule for heating circuit CO<index> (1-7)."""
+    if not 1 <= index <= MAX_CIRCUITS:
+        raise ValueError(f"circuit index must be 1-7, got {index}")
+    start = CIRCUIT_HOLDING_BASE + CIRCUIT_STEP * (index - 1) + SCHEDULE_OFFSET
+    return ScheduleDef(f"co{index}_schedule", f"CO{index} schedule", start)
+
+
+DHW_SCHEDULE = ScheduleDef("dhw_schedule", "DHW schedule", 40820)
+CIRC_SCHEDULE = ScheduleDef("circulation_schedule", "Circulation schedule", 40920)

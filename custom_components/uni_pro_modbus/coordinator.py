@@ -10,7 +10,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DataType, RegisterDef, RegType
+from .const import SCHEDULE_REGISTER_COUNT, DataType, RegisterDef, RegType, ScheduleDef
+from .schedule import decode_schedule, encode_schedule
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -36,6 +37,7 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
         unit_id: int,
         scan_interval: int,
         registers: list[RegisterDef],
+        schedules: list[ScheduleDef] | None = None,
     ) -> None:
         super().__init__(
             hass,
@@ -56,6 +58,13 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
         for reg in registers:
             seen[(reg.reg_type, reg.address)] = reg
         self._physical_registers = list(seen.items())
+
+        # Weekly schedule blocks (11 contiguous holding registers each),
+        # de-duplicated by their start register.
+        sched_seen: dict[int, ScheduleDef] = {}
+        for sched in schedules or []:
+            sched_seen[sched.start_register] = sched
+        self._schedules = list(sched_seen.values())
 
     async def _async_client(self):
         if self._client is None:
@@ -118,6 +127,27 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
 
             data[self._cache_key(reg_type, address)] = result.registers[0]
 
+        for sched in self._schedules:
+            try:
+                result = await client.read_holding_registers(
+                    address=sched.address,
+                    count=SCHEDULE_REGISTER_COUNT,
+                    **{slave_kw: self._unit_id},
+                )
+            except Exception as err:  # noqa: BLE001 - surfaced via UpdateFailed
+                raise UpdateFailed(
+                    f"Error reading schedule {sched.key} (reg {sched.start_register}) "
+                    f"at {self._host}:{self._port}: {err}"
+                ) from err
+
+            if result is None or result.isError():
+                raise UpdateFailed(
+                    f"Modbus error reading schedule {sched.key} (reg "
+                    f"{sched.start_register}) from unit {self._unit_id}: {result}"
+                )
+
+            data[self._schedule_cache_key(sched)] = list(result.registers)
+
         return data
 
     @staticmethod
@@ -146,6 +176,37 @@ class UniProModbusCoordinator(DataUpdateCoordinator[dict[str, int]]):
         if reg.data_type is DataType.ENUM16:
             return (reg.options or {}).get(raw, str(raw))
         return raw
+
+    @staticmethod
+    def _schedule_cache_key(sched: ScheduleDef) -> str:
+        return f"sched:{sched.start_register}"
+
+    def get_schedule(self, sched: ScheduleDef) -> dict[str, list[bool]]:
+        """Return the decoded weekly on/off schedule, or {} if not yet read."""
+        if self.data is None:
+            return {}
+        raw = self.data.get(self._schedule_cache_key(sched))
+        return decode_schedule(raw) if raw is not None else {}
+
+    async def async_write_schedule(
+        self, sched: ScheduleDef, week: dict[str, list[bool]]
+    ) -> None:
+        """Encode and write a full weekly schedule via function 16."""
+        regs = encode_schedule(week)
+        client = await self._async_client()
+        result = await client.write_registers(
+            address=sched.address,
+            values=regs,
+            **{self._slave_kw(client): self._unit_id},
+        )
+        if result is None or result.isError():
+            raise UniProModbusError(
+                f"Write to schedule {sched.key} (reg {sched.start_register}) failed: {result}"
+            )
+        # Reflect immediately in the local cache; confirmed on next poll.
+        if self.data is not None:
+            self.data[self._schedule_cache_key(sched)] = regs
+            self.async_set_updated_data(self.data)
 
     async def async_write(self, reg: RegisterDef, value) -> None:
         """Write a decoded value back to the device, encoding per data type."""
