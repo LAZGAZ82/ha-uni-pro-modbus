@@ -42,5 +42,25 @@
         }
       }
     }
+  },
+  "services": {
+    "set_schedule": {
+      "name": "Wochen-Zeitprogramm setzen",
+      "description": "Schreibt ein wochenweises Zeitprogramm (stundenweise Ein/Aus) für einen Heizkreis, den Warmwasser- (DHW) oder den Zirkulationskreis. Nur die angegebenen Tage werden geändert; nicht genannte Tage behalten ihr aktuelles Programm im Gerät.",
+      "fields": {
+        "entry_id": {
+          "name": "Integrations-Instanz",
+          "description": "Welche UNI-PRO-Modbus-Instanz angesprochen wird. Optional, wenn nur eine eingerichtet ist."
+        },
+        "schedule": {
+          "name": "Zeitprogramm",
+          "description": "Zeitprogramm welches Kreises geschrieben werden soll."
+        },
+        "days": {
+          "name": "Tage",
+          "description": "Zuordnung von Wochentag zu den Stunden, die EIN sein sollen. Jeder Tagwert ist eine Liste von Stundenzahlen (0-23) oder die Abkürzung \"all\" bzw. \"none\". Nicht genannte Wochentage bleiben unverändert."
+        }
+      }
+    }
   }
 }

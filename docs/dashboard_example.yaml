@@ -96,8 +96,10 @@ views:
             name: Pumpe
           - entity: binary_sensor.UNIPRO_PREFIX_co1_room_input_closed
             name: Raumeingang
-          - entity: binary_sensor.UNIPRO_PREFIX_co1_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_co1_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_co1_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Heizkreis CO2 (löschen, falls nicht genutzt) ─────────────────
       - type: entities
@@ -114,8 +116,10 @@ views:
             name: Pumpe
           - entity: binary_sensor.UNIPRO_PREFIX_co2_room_input_closed
             name: Raumeingang
-          - entity: binary_sensor.UNIPRO_PREFIX_co2_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_co2_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_co2_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Heizkreis CO3 (löschen, falls nicht genutzt) ─────────────────
       - type: entities
@@ -132,8 +136,10 @@ views:
             name: Pumpe
           - entity: binary_sensor.UNIPRO_PREFIX_co3_room_input_closed
             name: Raumeingang
-          - entity: binary_sensor.UNIPRO_PREFIX_co3_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_co3_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_co3_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Heizkreis CO4 (löschen, falls nicht genutzt) ─────────────────
       - type: entities
@@ -150,8 +156,10 @@ views:
             name: Pumpe
           - entity: binary_sensor.UNIPRO_PREFIX_co4_room_input_closed
             name: Raumeingang
-          - entity: binary_sensor.UNIPRO_PREFIX_co4_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_co4_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_co4_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Heizkreis CO5 (löschen, falls nicht genutzt) ─────────────────
       - type: entities
@@ -168,8 +176,10 @@ views:
             name: Pumpe
           - entity: binary_sensor.UNIPRO_PREFIX_co5_room_input_closed
             name: Raumeingang
-          - entity: binary_sensor.UNIPRO_PREFIX_co5_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_co5_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_co5_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Heizkreis CO6 (löschen, falls nicht genutzt) ─────────────────
       - type: entities
@@ -186,8 +196,10 @@ views:
             name: Pumpe
           - entity: binary_sensor.UNIPRO_PREFIX_co6_room_input_closed
             name: Raumeingang
-          - entity: binary_sensor.UNIPRO_PREFIX_co6_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_co6_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_co6_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Heizkreis CO7 (löschen, falls nicht genutzt) ─────────────────
       - type: entities
@@ -204,8 +216,10 @@ views:
             name: Pumpe
           - entity: binary_sensor.UNIPRO_PREFIX_co7_room_input_closed
             name: Raumeingang
-          - entity: binary_sensor.UNIPRO_PREFIX_co7_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_co7_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_co7_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Warmwasser / DHW (nur UNI2 PRO, löschen falls nicht genutzt) ──
       - type: entities
@@ -222,8 +236,26 @@ views:
             name: Pumpe
           - entity: switch.UNIPRO_PREFIX_dhw_disinfection
             name: Desinfektion
-          - entity: binary_sensor.UNIPRO_PREFIX_dhw_sensor_error
-            name: Fühlerfehler
+          - type: section
+            label: Desinfektion – Wochentage
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection_monday
+            name: Montag
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection_tuesday
+            name: Dienstag
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection_wednesday
+            name: Mittwoch
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection_thursday
+            name: Donnerstag
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection_friday
+            name: Freitag
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection_saturday
+            name: Samstag
+          - entity: switch.UNIPRO_PREFIX_dhw_disinfection_sunday
+            name: Sonntag
+          - entity: binary_sensor.UNIPRO_PREFIX_dhw_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_dhw_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Zirkulation (nur UNI2 PRO, löschen falls nicht genutzt) ───────
       - type: entities
@@ -240,8 +272,10 @@ views:
             name: Solltemperatur
           - entity: binary_sensor.UNIPRO_PREFIX_circulation_pump
             name: Pumpe
-          - entity: binary_sensor.UNIPRO_PREFIX_circulation_sensor_error
-            name: Fühlerfehler
+          - entity: binary_sensor.UNIPRO_PREFIX_circulation_sensor_error_short_circuit
+            name: Fühlerfehler (Kurzschluss)
+          - entity: binary_sensor.UNIPRO_PREFIX_circulation_sensor_error_open_circuit
+            name: Fühlerfehler (Unterbrechung)
 
       # ── Diagnose / Fühlerfehler ────────────────────────────────────────
       - type: entities
@@ -266,6 +300,767 @@ views:
             name: Externer Fühler Kurzschluss
           - entity: binary_sensor.UNIPRO_PREFIX_external_sensor_open_circuit
             name: Externer Fühler Unterbrechung
+
+  # ===========================================================================
+  # ANSICHT 2: Wochenzeitprogramme (ansehen + per Klick ändern)
+  # ---------------------------------------------------------------------------
+  # Nur Home-Assistant-Bordmittel, keine Zusatzinstallation. Die Buttons rufen
+  # den Dienst uni_pro_modbus.set_schedule auf und wirken SOFORT. Presets
+  # setzen ganze Wochenprogramme; die Tages-Buttons schalten EINEN Wochentag
+  # ganztags ein/aus (andere Tage bleiben, Read-Modify-Write im Dienst).
+  # Freies Setzen pro Stunde: Entwicklerwerkzeuge → Aktionen →
+  # 'UNI PRO Modbus: Wochen-Zeitprogramm setzen' (Formular, kein YAML nötig),
+  # days z. B.  monday: [6,7,8,18,19,20]  oder  sunday: all / saturday: none.
+  # CO2–CO7: einen CO1-Block kopieren und co1_schedule → coN_schedule ändern.
+  # ===========================================================================
+  - title: Zeitprogramme
+    path: uni-pro-zeitprogramme
+    icon: mdi:calendar-clock
+    cards:
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## CO1 – aktuelles Programm
+              {% set s = state_attr('sensor.UNIPRO_PREFIX_co1_schedule','schedule') %}
+              {% if s %}**{{ states('sensor.UNIPRO_PREFIX_co1_schedule') }} h/Woche aktiv**
+              
+              - **Montag:** {{ s.monday | join(', ') if s.monday else 'aus' }}
+              - **Dienstag:** {{ s.tuesday | join(', ') if s.tuesday else 'aus' }}
+              - **Mittwoch:** {{ s.wednesday | join(', ') if s.wednesday else 'aus' }}
+              - **Donnerstag:** {{ s.thursday | join(', ') if s.thursday else 'aus' }}
+              - **Freitag:** {{ s.friday | join(', ') if s.friday else 'aus' }}
+              - **Samstag:** {{ s.saturday | join(', ') if s.saturday else 'aus' }}
+              - **Sonntag:** {{ s.sunday | join(', ') if s.sunday else 'aus' }}
+              {% else %}_Noch keine Daten – ist die Integration verbunden?_{% endif %}
+          - type: markdown
+            content: "**Programm per Klick setzen:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: "24/7 an"
+                icon: mdi:calendar-check
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      monday: all
+                      tuesday: all
+                      wednesday: all
+                      thursday: all
+                      friday: all
+                      saturday: all
+                      sunday: all
+              - type: button
+                name: "Alles aus"
+                icon: mdi:calendar-remove
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      monday: none
+                      tuesday: none
+                      wednesday: none
+                      thursday: none
+                      friday: none
+                      saturday: none
+                      sunday: none
+              - type: button
+                name: "Werktags 06-22"
+                icon: mdi:calendar-week
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      monday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      tuesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      wednesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      thursday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      friday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      saturday: none
+                      sunday: none
+              - type: button
+                name: "Täglich 06-22"
+                icon: mdi:calendar-today
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      monday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      tuesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      wednesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      thursday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      friday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      saturday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      sunday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+              - type: button
+                name: "Wktg 05-21 / WE 07-22"
+                icon: mdi:calendar-weekend
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      monday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      tuesday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      wednesday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      thursday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      friday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      saturday: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      sunday: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+          - type: markdown
+            content: "**Einzelnen Tag ganztags EIN:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Mo
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      monday: all
+              - type: button
+                name: Di
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      tuesday: all
+              - type: button
+                name: Mi
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      wednesday: all
+              - type: button
+                name: Do
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      thursday: all
+              - type: button
+                name: Fr
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      friday: all
+              - type: button
+                name: Sa
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      saturday: all
+              - type: button
+                name: So
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      sunday: all
+          - type: markdown
+            content: "**Einzelnen Tag ganztags AUS:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Mo
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      monday: none
+              - type: button
+                name: Di
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      tuesday: none
+              - type: button
+                name: Mi
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      wednesday: none
+              - type: button
+                name: Do
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      thursday: none
+              - type: button
+                name: Fr
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      friday: none
+              - type: button
+                name: Sa
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      saturday: none
+              - type: button
+                name: So
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: co1_schedule
+                    days:
+                      sunday: none
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Warmwasser (DHW) – aktuelles Programm
+              {% set s = state_attr('sensor.UNIPRO_PREFIX_dhw_schedule','schedule') %}
+              {% if s %}**{{ states('sensor.UNIPRO_PREFIX_dhw_schedule') }} h/Woche aktiv**
+              
+              - **Montag:** {{ s.monday | join(', ') if s.monday else 'aus' }}
+              - **Dienstag:** {{ s.tuesday | join(', ') if s.tuesday else 'aus' }}
+              - **Mittwoch:** {{ s.wednesday | join(', ') if s.wednesday else 'aus' }}
+              - **Donnerstag:** {{ s.thursday | join(', ') if s.thursday else 'aus' }}
+              - **Freitag:** {{ s.friday | join(', ') if s.friday else 'aus' }}
+              - **Samstag:** {{ s.saturday | join(', ') if s.saturday else 'aus' }}
+              - **Sonntag:** {{ s.sunday | join(', ') if s.sunday else 'aus' }}
+              {% else %}_Noch keine Daten – ist die Integration verbunden?_{% endif %}
+          - type: markdown
+            content: "**Programm per Klick setzen:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: "24/7 an"
+                icon: mdi:calendar-check
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      monday: all
+                      tuesday: all
+                      wednesday: all
+                      thursday: all
+                      friday: all
+                      saturday: all
+                      sunday: all
+              - type: button
+                name: "Alles aus"
+                icon: mdi:calendar-remove
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      monday: none
+                      tuesday: none
+                      wednesday: none
+                      thursday: none
+                      friday: none
+                      saturday: none
+                      sunday: none
+              - type: button
+                name: "Werktags 06-22"
+                icon: mdi:calendar-week
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      monday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      tuesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      wednesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      thursday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      friday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      saturday: none
+                      sunday: none
+              - type: button
+                name: "Täglich 06-22"
+                icon: mdi:calendar-today
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      monday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      tuesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      wednesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      thursday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      friday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      saturday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      sunday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+              - type: button
+                name: "Wktg 05-21 / WE 07-22"
+                icon: mdi:calendar-weekend
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      monday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      tuesday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      wednesday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      thursday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      friday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      saturday: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      sunday: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+          - type: markdown
+            content: "**Einzelnen Tag ganztags EIN:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Mo
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      monday: all
+              - type: button
+                name: Di
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      tuesday: all
+              - type: button
+                name: Mi
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      wednesday: all
+              - type: button
+                name: Do
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      thursday: all
+              - type: button
+                name: Fr
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      friday: all
+              - type: button
+                name: Sa
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      saturday: all
+              - type: button
+                name: So
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      sunday: all
+          - type: markdown
+            content: "**Einzelnen Tag ganztags AUS:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Mo
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      monday: none
+              - type: button
+                name: Di
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      tuesday: none
+              - type: button
+                name: Mi
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      wednesday: none
+              - type: button
+                name: Do
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      thursday: none
+              - type: button
+                name: Fr
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      friday: none
+              - type: button
+                name: Sa
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      saturday: none
+              - type: button
+                name: So
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: dhw_schedule
+                    days:
+                      sunday: none
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Zirkulation – aktuelles Programm
+              {% set s = state_attr('sensor.UNIPRO_PREFIX_circulation_schedule','schedule') %}
+              {% if s %}**{{ states('sensor.UNIPRO_PREFIX_circulation_schedule') }} h/Woche aktiv**
+              
+              - **Montag:** {{ s.monday | join(', ') if s.monday else 'aus' }}
+              - **Dienstag:** {{ s.tuesday | join(', ') if s.tuesday else 'aus' }}
+              - **Mittwoch:** {{ s.wednesday | join(', ') if s.wednesday else 'aus' }}
+              - **Donnerstag:** {{ s.thursday | join(', ') if s.thursday else 'aus' }}
+              - **Freitag:** {{ s.friday | join(', ') if s.friday else 'aus' }}
+              - **Samstag:** {{ s.saturday | join(', ') if s.saturday else 'aus' }}
+              - **Sonntag:** {{ s.sunday | join(', ') if s.sunday else 'aus' }}
+              {% else %}_Noch keine Daten – ist die Integration verbunden?_{% endif %}
+          - type: markdown
+            content: "**Programm per Klick setzen:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: "24/7 an"
+                icon: mdi:calendar-check
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      monday: all
+                      tuesday: all
+                      wednesday: all
+                      thursday: all
+                      friday: all
+                      saturday: all
+                      sunday: all
+              - type: button
+                name: "Alles aus"
+                icon: mdi:calendar-remove
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      monday: none
+                      tuesday: none
+                      wednesday: none
+                      thursday: none
+                      friday: none
+                      saturday: none
+                      sunday: none
+              - type: button
+                name: "Werktags 06-22"
+                icon: mdi:calendar-week
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      monday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      tuesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      wednesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      thursday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      friday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      saturday: none
+                      sunday: none
+              - type: button
+                name: "Täglich 06-22"
+                icon: mdi:calendar-today
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      monday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      tuesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      wednesday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      thursday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      friday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      saturday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      sunday: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+              - type: button
+                name: "Wktg 05-21 / WE 07-22"
+                icon: mdi:calendar-weekend
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      monday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      tuesday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      wednesday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      thursday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      friday: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                      saturday: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+                      sunday: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]
+          - type: markdown
+            content: "**Einzelnen Tag ganztags EIN:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Mo
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      monday: all
+              - type: button
+                name: Di
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      tuesday: all
+              - type: button
+                name: Mi
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      wednesday: all
+              - type: button
+                name: Do
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      thursday: all
+              - type: button
+                name: Fr
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      friday: all
+              - type: button
+                name: Sa
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      saturday: all
+              - type: button
+                name: So
+                icon: mdi:calendar-plus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      sunday: all
+          - type: markdown
+            content: "**Einzelnen Tag ganztags AUS:**"
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Mo
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      monday: none
+              - type: button
+                name: Di
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      tuesday: none
+              - type: button
+                name: Mi
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      wednesday: none
+              - type: button
+                name: Do
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      thursday: none
+              - type: button
+                name: Fr
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      friday: none
+              - type: button
+                name: Sa
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      saturday: none
+              - type: button
+                name: So
+                icon: mdi:calendar-minus
+                tap_action:
+                  action: perform-action
+                  perform_action: uni_pro_modbus.set_schedule
+                  data:
+                    schedule: circulation_schedule
+                    days:
+                      sunday: none
 
 # Hinweis: Feineinstellungen wie Heizkurvenpunkte (-20°C/-5°C/+5°C/+15°C)
 # und Zeiten für die Kurzzeitanhebung sind bewusst nicht in diesem

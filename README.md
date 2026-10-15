@@ -38,31 +38,91 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
   queries (per the manufacturer's Modbus manual)
 - Select which heating circuits (CO1-CO7) are active per installation
 - Entities:
-  - **sensor**: supply/outside/circuit/DHW/circulation temperatures
+  - **sensor**: supply/outside/circuit/DHW/circulation temperatures, plus a
+    read-only **weekly schedule** sensor per loop (active hours + the full
+    per-day on/off in attributes)
   - **binary_sensor**: alarm, pump running, sensor faults, room input,
     circuit enabled/disabled status (read-only per the device's own spec)
   - **number**: set temperatures, weather-curve points, timed-activation
-    duration/temperature
+    duration/temperature, heating season start/end date (month/day)
   - **select**: heating season mode, circulation control mode
-  - **switch**: DHW disinfection
+  - **switch**: DHW disinfection on/off, plus one switch per weekday for
+    the DHW disinfection schedule (UNI2 PRO)
+- **Weekly schedules** (CO1-CO7, DHW, Circulation) are readable and
+  writable — read via the schedule sensors, written with the
+  `uni_pro_modbus.set_schedule` service (see "Weekly schedules" below)
 - Options flow to change active circuits / DHW / circulation / poll
   interval after setup, without deleting and re-adding the integration
 
 ## Not yet implemented (roadmap)
 
-- Weekly schedule registers (CO1-CO7, DHW, Circulation) — these are
-  bit-packed, 11 registers per schedule; worth a dedicated
-  card/service rather than 11 generic number entities per circuit.
-- Heating season start/end **date** (month/day packed into one register).
-- CO2-CO7 sub-register layout (set point, weather curve, timers) is
-  **assumed** to mirror CO1's, based on the address-offset table in the
-  manual (see `custom_components/uni_pro_modbus/const.py` docstring).
-  Verify against real hardware once a customer has more than one active
-  circuit before relying on it in the field.
+- CO2-CO7 sub-register layout (set point, weather curve, timers, schedule)
+  mirrors CO1's; this is **confirmed** by the address-offset table in the
+  manual (page 2, fixed +100 per circuit — see
+  `custom_components/uni_pro_modbus/const.py` docstring). A spot-check on
+  real hardware with more than one active circuit is still recommended
+  before relying on it in the field.
 - Register addressing was validated against the worked examples in the
   manual (Modicon convention, `raw = register - base`), but the manual
   itself warns addressing "may differ by 1 depending on the software
   used" — re-confirm with a real device on first hardware bring-up.
+
+## Weekly schedules
+
+Each heating circuit (CO1-CO7), the DHW circuit and the Circulation circuit
+has a weekly on/off schedule in the controller: a per-hour on/off flag for
+every hour of every weekday (168 hours total). The controller's schedule is
+**on/off only** — there is no per-slot comfort/setback temperature in the
+Modbus schedule registers (confirmed against the manufacturer manual, v0.3).
+
+**Reading.** Each active loop gets a diagnostic sensor, e.g.
+`sensor.<prefix>_co1_schedule`. Its state is the number of active hours in
+the week (0-168). The full schedule is in its attributes:
+
+- `schedule`: human-readable per-day time ranges, e.g.
+  `monday: ["06:00-09:00", "18:00-21:00"]`
+- `weekly`: raw per-hour booleans (`{monday: [false, false, ...]}`) for use
+  in templates and automations
+
+**Writing.** Use the `uni_pro_modbus.set_schedule` service. It is a
+read-modify-write: only the weekdays you pass are changed, the rest keep
+their current schedule on the device. Each day's value is a list of the hours
+(0-23) that should be ON, or the shortcut `all` / `none`.
+
+```yaml
+service: uni_pro_modbus.set_schedule
+data:
+  # entry_id: <optional, only needed if you have more than one instance>
+  schedule: co1_schedule   # co1_schedule .. co7_schedule, dhw_schedule, circulation_schedule
+  days:
+    monday: [6, 7, 8, 18, 19, 20]   # on 06:00-09:00 and 18:00-21:00
+    tuesday: [6, 7, 8, 18, 19, 20]
+    sunday: all                      # on all day
+    saturday: none                   # off all day
+    # wednesday/thursday/friday omitted -> left unchanged
+```
+
+Schedules are written with Modbus function 16 (write multiple registers),
+which is the only write function the controller offers for the schedule
+block.
+
+**Dashboard (no YAML, no extra install).** `docs/dashboard_example.yaml`
+ships a second view, "Zeitprogramme", that shows each loop's current schedule
+and lets the customer change it by clicking: preset buttons (24/7, off,
+weekdays 06-22, ...) and per-weekday whole-day on/off buttons, all wired to
+the `set_schedule` service. Free-form per-hour editing is done from
+Developer Tools -> Actions (the service form, still no YAML).
+
+> **Note on Home Assistant `schedule` helpers.** The project originally aimed
+> to mirror schedules into native HA `schedule` helpers that the customer
+> paints in the built-in schedule card. That turns out not to be workable
+> with built-in cards alone: Home Assistant neither lets an integration
+> create/edit a `schedule` helper at runtime, nor exposes a helper's full
+> weekly definition to templates/automations, so a helper cannot drive the
+> device automatically. Hence the native approach above (read-back sensors +
+> `set_schedule` service + preset/whole-day buttons). Truly free-form
+> click-painting of every hour would require an optional custom Lovelace card
+> (e.g. a scheduler card from HACS) — deliberately not required here.
 
 ## Einrichtung / Installation
 
@@ -146,7 +206,10 @@ Dashboard → Raw configuration editor.
   docstring notes on every assumption made where the manual was ambiguous
   or incomplete. The manual itself is committed at
   [`docs/UNI_PRO_Modbus_RTU_v0.3_eng.pdf`](docs/UNI_PRO_Modbus_RTU_v0.3_eng.pdf)
-  for reference.
+  for reference. A complete register-by-register mapping of the manual
+  against the code (every register: address, read/write per the manual, and
+  its status in the integration) is in
+  [`docs/register-abgleich.md`](docs/register-abgleich.md).
 - Update `manifest.json` (`codeowners`, `documentation`, `issue_tracker`,
   `version`) with your actual GitHub org/repo before publishing.
 - Tag a GitHub release matching `manifest.json`'s `version` before adding

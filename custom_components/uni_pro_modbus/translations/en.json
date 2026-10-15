@@ -42,5 +42,25 @@
         }
       }
     }
+  },
+  "services": {
+    "set_schedule": {
+      "name": "Set weekly schedule",
+      "description": "Write a weekly on/off schedule (per hour) to a heating circuit, the DHW circuit or the circulation circuit. Only the days you provide are changed; omitted days keep their current schedule on the device.",
+      "fields": {
+        "entry_id": {
+          "name": "Integration instance",
+          "description": "Which UNI PRO Modbus instance to target. Optional if only one is configured."
+        },
+        "schedule": {
+          "name": "Schedule",
+          "description": "Which loop's schedule to write."
+        },
+        "days": {
+          "name": "Days",
+          "description": "Mapping of weekday to the hours that should be ON. Each day's value is a list of hour numbers (0-23), or the shortcut \"all\" or \"none\". Weekdays not listed are left unchanged."
+        }
+      }
+    }
   }
 }

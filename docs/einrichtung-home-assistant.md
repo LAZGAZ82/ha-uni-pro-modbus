@@ -62,3 +62,21 @@ UNI2 PRO / UNI3 PRO und der Bridge (Waveshare ESP32-S3-RS485-CAN).
 | Regler stumm trotz Verdrahtung | Modbus [13-12-3-1] aktiv? Reset gemacht? Slave-ID 1? Zweites A/B-Klemmenpaar probieren |
 | HA-Einrichtung scheitert, PC-Test klappt | IP statt `.local` eintragen, Slave-ID-Regler auf 1 |
 | Bridge-Hotspot weg nach Routerwechsel | öffnet sich automatisch neu; BOOT-Taste 5 s = WLAN-Reset |
+
+
+## 7. Nach der Einrichtung: Bedienen
+
+- Die **Geräteseite** (Einstellungen -> Geräte & Dienste -> UNI PRO Modbus ->
+  Gerät) zeigt automatisch alle Temperaturen, Soll-/Kurvenwerte, Pumpen- und
+  Fühlerzustände sowie die Zeitprogramme – ohne weitere Einrichtung.
+- **Wochenzeitprogramme** (CO1-CO7, Warmwasser, Zirkulation) lassen sich je
+  Kreis ablesen (Sensor "... Zeitprogramm", Stunde für Stunde in den
+  Attributen) und per Dienst **`uni_pro_modbus.set_schedule`** setzen
+  (Entwicklerwerkzeuge -> Aktionen, Formular, kein YAML nötig). Beispiel:
+  `schedule: co1_schedule`, `days: {monday: [6,7,8,18,19,20], sunday: all}`.
+- **Warmwasser-Desinfektion**: Ein/Aus plus je ein Schalter pro Wochentag
+  (nur UNI2 PRO).
+- **Fertiges Dashboard** zum Kopieren inkl. einer Klick-Ansicht für die
+  Zeitprogramme: siehe [`dashboard_example.yaml`](dashboard_example.yaml).
+- Eine vollständige Liste aller ausgelesenen/beschreibbaren Register steht in
+  [`register-abgleich.md`](register-abgleich.md).

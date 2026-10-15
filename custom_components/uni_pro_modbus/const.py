@@ -14,12 +14,14 @@ IMPORTANT / open items to verify against real hardware:
   the software used". The examples in the manual match the convention above,
   but re-check with function 04/03 reads against the actual device before
   relying on this in production.
-- The CO1 sub-register layout (set point, weather-curve points, timed
-  activation, schedule) is documented in full only for CO1. CO2-CO7 are
-  documented only as address ranges (see CIRCUIT_OFFSETS) with the same
-  span (40x01-40x30 / 30x01-30x02). This integration assumes the same
-  relative sub-offsets repeat for every circuit. Verify on hardware with
-  more than one active circuit before shipping to a customer with CO2+.
+- The per-circuit sub-register layout (set point, weather-curve points,
+  timed activation, schedule) is documented in full only for CO1. The
+  manual's address-offset table (page 2) documents the complete
+  40x01-40x30 / 30x01-30x02 span repeating for every circuit CO1-CO7 with a
+  fixed +100 offset (see CIRCUIT_INPUT_BASE / CIRCUIT_HOLDING_BASE /
+  CIRCUIT_STEP), so the relative sub-offsets are confirmed to be identical
+  per circuit. Still worth a spot-check on hardware with more than one active
+  circuit before relying on CO2+ in the field.
 - UNI2 PRO does not support CO3 circulation queries (see manual, page 2).
 - UNI3 PRO does not support DHW or Circulation queries at all.
 """
@@ -82,6 +84,8 @@ class DataType(str, Enum):
     UINT16 = "uint16"
     BIT = "bit"  # single bit out of a 16-bit bitfield register
     ENUM16 = "enum16"
+    UINT8_HIGH = "uint8_high"  # high byte of a 16-bit register (e.g. month in packed month/day)
+    UINT8_LOW = "uint8_low"  # low byte of a 16-bit register (e.g. day in packed month/day)
 
 
 @dataclass(frozen=True)
@@ -100,6 +104,9 @@ class RegisterDef:
     device_class: str | None = None
     icon: str | None = None
     entity_category: str | None = None  # "diagnostic" | "config" | None
+    native_min: float | None = None  # optional number min/max/step overrides
+    native_max: float | None = None
+    native_step: float | None = None
 
     @property
     def base(self) -> int:
@@ -168,11 +175,30 @@ GENERAL_CONFIG: list[RegisterDef] = [
     RegisterDef("heating_season_end_temp", "Heating season end temperature", 40005,
                 RegType.HOLDING, DataType.INT16_X10, writable=True, unit="°C",
                 device_class="temperature", entity_category="config"),
+    # Heating season start/end *date*: register 40002 (start) and 40003 (end)
+    # each pack the date into one 16-bit register as two bytes. Byte order is
+    # CONFIRMED by the manual (v0.3 / 14-05-2026): "Byte HI (older): month
+    # (1-12), Byte LO (younger): day (1-31)" -> high byte = month, low byte =
+    # day, exactly as mapped below (UINT8_HIGH = month, UINT8_LOW = day).
+    # Writes go through a read-modify-write (see coordinator.async_write) so
+    # setting one half preserves the other.
+    RegisterDef("heating_season_start_month", "Heating season start month", 40002,
+                RegType.HOLDING, DataType.UINT8_HIGH, writable=True, native_min=1,
+                native_max=12, native_step=1, entity_category="config",
+                icon="mdi:calendar-start"),
+    RegisterDef("heating_season_start_day", "Heating season start day", 40002,
+                RegType.HOLDING, DataType.UINT8_LOW, writable=True, native_min=1,
+                native_max=31, native_step=1, entity_category="config",
+                icon="mdi:calendar-start"),
+    RegisterDef("heating_season_end_month", "Heating season end month", 40003,
+                RegType.HOLDING, DataType.UINT8_HIGH, writable=True, native_min=1,
+                native_max=12, native_step=1, entity_category="config",
+                icon="mdi:calendar-end"),
+    RegisterDef("heating_season_end_day", "Heating season end day", 40003,
+                RegType.HOLDING, DataType.UINT8_LOW, writable=True, native_min=1,
+                native_max=31, native_step=1, entity_category="config",
+                icon="mdi:calendar-end"),
 ]
-# NOTE: heating season start/end *date* registers (40002/40003) are packed as
-# two bytes (month/day) in one 16-bit register. Not exposed as entities in v1
-# - would need a dedicated date-pair number pair or a text platform. Left as
-# a follow-up; see README "Roadmap".
 
 # ---------------------------------------------------------------------------
 # Per-circuit (CO1..CO7) register template
@@ -190,7 +216,6 @@ CIRCUIT_STEP = 100
 @dataclass(frozen=True)
 class CircuitRegisters:
     index: int  # 1..7
-    status: RegisterDef
     temperature: RegisterDef
     enabled: RegisterDef
     set_temp: RegisterDef
@@ -203,6 +228,7 @@ class CircuitRegisters:
     pump_bit: RegisterDef
     room_input_bit: RegisterDef
     sensor_error_bit: RegisterDef
+    sensor_error_open_bit: RegisterDef
 
 
 def build_circuit(index: int) -> CircuitRegisters:
@@ -227,8 +253,6 @@ def build_circuit(index: int) -> CircuitRegisters:
 
     return CircuitRegisters(
         index=index,
-        status=RegisterDef(f"{prefix}_status_raw", f"{label} status", in_status, RegType.INPUT,
-                            DataType.BIT, bit=0),
         temperature=RegisterDef(f"{prefix}_temperature", f"{label} temperature", in_temp,
                                  RegType.INPUT, DataType.INT16_X10, unit="°C",
                                  device_class="temperature"),
@@ -267,9 +291,13 @@ def build_circuit(index: int) -> CircuitRegisters:
                               DataType.BIT, bit=0, device_class="running"),
         room_input_bit=RegisterDef(f"{prefix}_room_input", f"{label} room input closed",
                                     in_status, RegType.INPUT, DataType.BIT, bit=1),
-        sensor_error_bit=RegisterDef(f"{prefix}_sensor_error", f"{label} sensor error",
+        sensor_error_bit=RegisterDef(f"{prefix}_sensor_error", f"{label} sensor error (short circuit)",
                                       in_status, RegType.INPUT, DataType.BIT, bit=2,
                                       device_class="problem", entity_category="diagnostic"),
+        sensor_error_open_bit=RegisterDef(f"{prefix}_sensor_error_open",
+                                           f"{label} sensor error (open circuit)",
+                                           in_status, RegType.INPUT, DataType.BIT, bit=3,
+                                           device_class="problem", entity_category="diagnostic"),
     )
 
 
@@ -279,9 +307,12 @@ def build_circuit(index: int) -> CircuitRegisters:
 
 DHW_STATUS = RegisterDef("dhw_pump", "DHW pump", 30801, RegType.INPUT, DataType.BIT, bit=0,
                           device_class="running")
-DHW_SENSOR_ERROR = RegisterDef("dhw_sensor_error", "DHW sensor error", 30801, RegType.INPUT,
-                                DataType.BIT, bit=2, device_class="problem",
+DHW_SENSOR_ERROR = RegisterDef("dhw_sensor_error", "DHW sensor error (short circuit)", 30801,
+                                RegType.INPUT, DataType.BIT, bit=2, device_class="problem",
                                 entity_category="diagnostic")
+DHW_SENSOR_ERROR_OPEN = RegisterDef("dhw_sensor_error_open", "DHW sensor error (open circuit)",
+                                     30801, RegType.INPUT, DataType.BIT, bit=3,
+                                     device_class="problem", entity_category="diagnostic")
 DHW_TEMPERATURE = RegisterDef("dhw_temperature", "DHW temperature", 30802, RegType.INPUT,
                                DataType.INT16_X10, unit="°C", device_class="temperature")
 DHW_ENABLED = RegisterDef("dhw_enabled", "DHW circuit enabled", 40801, RegType.HOLDING,
@@ -310,9 +341,14 @@ DHW_TEMP_ACTIVATION_TEMP = RegisterDef("dhw_temp_activation_temp",
 
 CIRC_STATUS = RegisterDef("circulation_pump", "Circulation pump", 30901, RegType.INPUT,
                            DataType.BIT, bit=0, device_class="running")
-CIRC_SENSOR_ERROR = RegisterDef("circulation_sensor_error", "Circulation sensor error", 30901,
+CIRC_SENSOR_ERROR = RegisterDef("circulation_sensor_error",
+                                 "Circulation sensor error (short circuit)", 30901,
                                  RegType.INPUT, DataType.BIT, bit=2, device_class="problem",
                                  entity_category="diagnostic")
+CIRC_SENSOR_ERROR_OPEN = RegisterDef("circulation_sensor_error_open",
+                                      "Circulation sensor error (open circuit)", 30901,
+                                      RegType.INPUT, DataType.BIT, bit=3, device_class="problem",
+                                      entity_category="diagnostic")
 CIRC_TEMPERATURE = RegisterDef("circulation_temperature", "Circulation temperature", 30902,
                                 RegType.INPUT, DataType.INT16_X10, unit="°C",
                                 device_class="temperature")
@@ -329,3 +365,95 @@ CIRC_TEMP_ACTIVATION_MINUTES = RegisterDef("circulation_temp_activation_minutes"
                                             "Circulation temporary activation duration", 40910,
                                             RegType.HOLDING, DataType.UINT16, writable=True,
                                             unit="min", entity_category="config")
+
+# ---------------------------------------------------------------------------
+# Weekly schedules (CO1..CO7, DHW, Circulation)
+# ---------------------------------------------------------------------------
+# Each schedule is a contiguous block of 11 holding registers (manual: CO1 at
+# 40120-40130, DHW at 40820-40830, Circulation at 40920-40930; per-circuit
+# schedules follow the same +100 offset table as the rest of the circuit, so
+# CO<n> starts at 40120 + 100*(n-1)).
+#
+# Encoding (confirmed by the two worked examples in the manual, v0.3):
+#   - 11 registers * 2 bytes = 22 bytes. Byte order within each register is
+#     HI (older) then LO (younger).
+#   - The first 21 bytes are meaningful: 7 days * 3 eight-hour blocks, in the
+#     order Sunday, Monday, ... Saturday; within a day the blocks are
+#     00:00-07:00, 08:00-15:00, 16:00-23:00.
+#   - Each block byte holds 8 bits = 8 hours; bit N (LSB first) = hour
+#     (block*8 + N), value 1 = active/on, 0 = inactive/off.
+#   - The 22nd byte (LO of the last register) is unused and always 0x00.
+# This is pure per-hour on/off; the manual defines NO per-slot comfort/setback
+# temperature for schedules. Writes use function 16 (write multiple holding
+# registers) only - function 06 is not offered for the schedule block.
+#
+# Manual example 1: reading the CO1 schedule "where all hours are active"
+#   -> 21x 0xFF + 0x00 (registers 0xFFFF .. 0xFF00).
+# Manual example 2: CO2 schedule "inactive every day at 6 o'clock"
+#   -> per day 0xBF 0xFF 0xFF (bit 6 of the 00:00-07:00 block cleared).
+
+SCHEDULE_REGISTER_COUNT = 11
+# A schedule's first register, relative to the loop's own holding base
+# (CIRCUIT_HOLDING_BASE / DHW 40801 / Circulation 40901): 40120-40101 = 19.
+SCHEDULE_OFFSET = 19
+# Day order as laid out in the register block (manual pages 4-7).
+SCHEDULE_DAYS = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+]
+
+
+@dataclass(frozen=True)
+class ScheduleDef:
+    """A weekly on/off schedule occupying SCHEDULE_REGISTER_COUNT holding
+    registers starting at `start_register` (documented register number)."""
+
+    key: str
+    name: str
+    start_register: int  # e.g. 40120 (CO1), 40820 (DHW), 40920 (Circulation)
+
+    @property
+    def address(self) -> int:
+        """Raw 0-based Modbus address of the first schedule register."""
+        return self.start_register - 40001
+
+
+def build_circuit_schedule(index: int) -> ScheduleDef:
+    """Schedule for heating circuit CO<index> (1-7)."""
+    if not 1 <= index <= MAX_CIRCUITS:
+        raise ValueError(f"circuit index must be 1-7, got {index}")
+    start = CIRCUIT_HOLDING_BASE + CIRCUIT_STEP * (index - 1) + SCHEDULE_OFFSET
+    return ScheduleDef(f"co{index}_schedule", f"CO{index} schedule", start)
+
+
+DHW_SCHEDULE = ScheduleDef("dhw_schedule", "DHW schedule", 40820)
+CIRC_SCHEDULE = ScheduleDef("circulation_schedule", "Circulation schedule", 40920)
+
+# DHW disinfection weekly schedule: register 40806, "7 bits of the lower byte
+# (LO)" = one bit per weekday (manual, r/w via function 03/06). The manual does
+# not state which bit is which day, so the mapping below ASSUMES the same
+# Sunday-first order used by the hourly schedule block (SCHEDULE_DAYS): bit 0 =
+# Sunday ... bit 6 = Saturday. Verify on hardware (enable one weekday in the
+# controller UI, read 40806 back) and reorder DISINFECTION_DAY_BITS if needed.
+# Each bit is exposed as its own writable switch, matching the DHW disinfection
+# on/off switch above. Bit writes are read-modify-write (see coordinator) so
+# toggling one day preserves the others.
+DISINFECTION_DAY_BITS = list(enumerate(SCHEDULE_DAYS))  # [(0,"sunday"),...,(6,"saturday")]
+_DAY_TITLES = {
+    "sunday": "Sunday", "monday": "Monday", "tuesday": "Tuesday",
+    "wednesday": "Wednesday", "thursday": "Thursday", "friday": "Friday",
+    "saturday": "Saturday",
+}
+DHW_DISINFECTION_DAYS = [
+    RegisterDef(
+        f"dhw_disinfection_{day}", f"DHW disinfection {_DAY_TITLES[day]}", 40806,
+        RegType.HOLDING, DataType.BIT, bit=bit, writable=True,
+        icon="mdi:bacteria-outline", entity_category="config",
+    )
+    for bit, day in DISINFECTION_DAY_BITS
+]
