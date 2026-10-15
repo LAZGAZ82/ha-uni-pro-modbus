@@ -55,8 +55,6 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
 
 ## Not yet implemented (roadmap)
 
-- DHW disinfection **day-of-week** schedule (register 40806, 7-bit
-  weekday mask) is not yet exposed. The hourly weekly schedules are.
 - CO2-CO7 sub-register layout (set point, weather curve, timers, schedule)
   mirrors CO1's; this is **confirmed** by the address-offset table in the
   manual (page 2, fixed +100 per circuit — see
@@ -198,7 +196,10 @@ Dashboard → Raw configuration editor.
   docstring notes on every assumption made where the manual was ambiguous
   or incomplete. The manual itself is committed at
   [`docs/UNI_PRO_Modbus_RTU_v0.3_eng.pdf`](docs/UNI_PRO_Modbus_RTU_v0.3_eng.pdf)
-  for reference.
+  for reference. A complete register-by-register mapping of the manual
+  against the code (every register: address, read/write per the manual, and
+  its status in the integration) is in
+  [`docs/register-abgleich.md`](docs/register-abgleich.md).
 - Update `manifest.json` (`codeowners`, `documentation`, `issue_tracker`,
   `version`) with your actual GitHub org/repo before publishing.
 - Tag a GitHub release matching `manifest.json`'s `version` before adding
