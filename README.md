@@ -42,7 +42,7 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
   - **binary_sensor**: alarm, pump running, sensor faults, room input,
     circuit enabled/disabled status (read-only per the device's own spec)
   - **number**: set temperatures, weather-curve points, timed-activation
-    duration/temperature
+    duration/temperature, heating season start/end date (month/day)
   - **select**: heating season mode, circulation control mode
   - **switch**: DHW disinfection
 - Options flow to change active circuits / DHW / circulation / poll
@@ -53,7 +53,6 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
 - Weekly schedule registers (CO1-CO7, DHW, Circulation) — these are
   bit-packed, 11 registers per schedule; worth a dedicated
   card/service rather than 11 generic number entities per circuit.
-- Heating season start/end **date** (month/day packed into one register).
 - CO2-CO7 sub-register layout (set point, weather curve, timers) is
   **assumed** to mirror CO1's, based on the address-offset table in the
   manual (see `custom_components/uni_pro_modbus/const.py` docstring).

@@ -23,7 +23,9 @@ async def async_setup_entry(
     entities = [
         UniProNumber(coordinator, entry.entry_id, device_name, model_label, reg)
         for reg in active.all_defs()
-        if reg.data_type in (DataType.INT16_X10, DataType.UINT16) and reg.writable
+        if reg.data_type
+        in (DataType.INT16_X10, DataType.UINT16, DataType.UINT8_HIGH, DataType.UINT8_LOW)
+        and reg.writable
     ]
     async_add_entities(entities)
 
@@ -46,6 +48,10 @@ class UniProNumber(UniProModbusEntity, NumberEntity):
             self._attr_native_min_value = 0
             self._attr_native_max_value = 5940
             self._attr_native_step = 1
+        elif reg.native_min is not None or reg.native_max is not None:
+            self._attr_native_min_value = reg.native_min if reg.native_min is not None else 0
+            self._attr_native_max_value = reg.native_max if reg.native_max is not None else 65535
+            self._attr_native_step = reg.native_step or 1
         else:
             self._attr_native_min_value = 0
             self._attr_native_max_value = 65535

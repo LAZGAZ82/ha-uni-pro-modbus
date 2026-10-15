@@ -16,7 +16,8 @@ IMPORTANT / open items to verify against real hardware:
   relying on this in production.
 - The CO1 sub-register layout (set point, weather-curve points, timed
   activation, schedule) is documented in full only for CO1. CO2-CO7 are
-  documented only as address ranges (see CIRCUIT_OFFSETS) with the same
+  documented only as address ranges (built here from CIRCUIT_INPUT_BASE /
+  CIRCUIT_HOLDING_BASE / CIRCUIT_STEP, see below) with the same
   span (40x01-40x30 / 30x01-30x02). This integration assumes the same
   relative sub-offsets repeat for every circuit. Verify on hardware with
   more than one active circuit before shipping to a customer with CO2+.
@@ -82,6 +83,8 @@ class DataType(str, Enum):
     UINT16 = "uint16"
     BIT = "bit"  # single bit out of a 16-bit bitfield register
     ENUM16 = "enum16"
+    UINT8_HIGH = "uint8_high"  # high byte of a 16-bit register (e.g. month in packed month/day)
+    UINT8_LOW = "uint8_low"  # low byte of a 16-bit register (e.g. day in packed month/day)
 
 
 @dataclass(frozen=True)
@@ -100,6 +103,9 @@ class RegisterDef:
     device_class: str | None = None
     icon: str | None = None
     entity_category: str | None = None  # "diagnostic" | "config" | None
+    native_min: float | None = None  # optional number min/max/step overrides
+    native_max: float | None = None
+    native_step: float | None = None
 
     @property
     def base(self) -> int:
@@ -168,11 +174,31 @@ GENERAL_CONFIG: list[RegisterDef] = [
     RegisterDef("heating_season_end_temp", "Heating season end temperature", 40005,
                 RegType.HOLDING, DataType.INT16_X10, writable=True, unit="°C",
                 device_class="temperature", entity_category="config"),
+    # Heating season start/end *date*: register 40002 (start) and 40003 (end)
+    # each pack the date into one 16-bit register as two bytes. ASSUMPTION:
+    # high byte = month (1-12), low byte = day (1-31). The manual documents the
+    # pair as "month/day" but does not state the byte order explicitly. Writes
+    # go through a read-modify-write (see coordinator.async_write) so setting
+    # one half preserves the other. Re-confirm on real hardware: set a known
+    # date in the controller UI, read 40002/40003 back, and swap UINT8_HIGH/LOW
+    # here if reversed.
+    RegisterDef("heating_season_start_month", "Heating season start month", 40002,
+                RegType.HOLDING, DataType.UINT8_HIGH, writable=True, native_min=1,
+                native_max=12, native_step=1, entity_category="config",
+                icon="mdi:calendar-start"),
+    RegisterDef("heating_season_start_day", "Heating season start day", 40002,
+                RegType.HOLDING, DataType.UINT8_LOW, writable=True, native_min=1,
+                native_max=31, native_step=1, entity_category="config",
+                icon="mdi:calendar-start"),
+    RegisterDef("heating_season_end_month", "Heating season end month", 40003,
+                RegType.HOLDING, DataType.UINT8_HIGH, writable=True, native_min=1,
+                native_max=12, native_step=1, entity_category="config",
+                icon="mdi:calendar-end"),
+    RegisterDef("heating_season_end_day", "Heating season end day", 40003,
+                RegType.HOLDING, DataType.UINT8_LOW, writable=True, native_min=1,
+                native_max=31, native_step=1, entity_category="config",
+                icon="mdi:calendar-end"),
 ]
-# NOTE: heating season start/end *date* registers (40002/40003) are packed as
-# two bytes (month/day) in one 16-bit register. Not exposed as entities in v1
-# - would need a dedicated date-pair number pair or a text platform. Left as
-# a follow-up; see README "Roadmap".
 
 # ---------------------------------------------------------------------------
 # Per-circuit (CO1..CO7) register template
