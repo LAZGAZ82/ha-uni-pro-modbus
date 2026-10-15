@@ -105,14 +105,23 @@ Schedules are written with Modbus function 16 (write multiple registers),
 which is the only write function the controller offers for the schedule
 block.
 
+**Dashboard (no YAML, no extra install).** `docs/dashboard_example.yaml`
+ships a second view, "Zeitprogramme", that shows each loop's current schedule
+and lets the customer change it by clicking: preset buttons (24/7, off,
+weekdays 06-22, ...) and per-weekday whole-day on/off buttons, all wired to
+the `set_schedule` service. Free-form per-hour editing is done from
+Developer Tools -> Actions (the service form, still no YAML).
+
 > **Note on Home Assistant `schedule` helpers.** The project originally aimed
-> to mirror these into native HA `schedule` helpers. Home Assistant does not
-> provide a supported API for an integration to create or edit a user's
-> `schedule` helper at runtime, so the schedule is exposed as a readable
-> sensor plus the `set_schedule` service instead. If you want to drive the
-> device from a `schedule` helper you create yourself, use an automation that
-> calls `set_schedule` when the helper changes; a helper-sync option can be
-> added as a follow-up.
+> to mirror schedules into native HA `schedule` helpers that the customer
+> paints in the built-in schedule card. That turns out not to be workable
+> with built-in cards alone: Home Assistant neither lets an integration
+> create/edit a `schedule` helper at runtime, nor exposes a helper's full
+> weekly definition to templates/automations, so a helper cannot drive the
+> device automatically. Hence the native approach above (read-back sensors +
+> `set_schedule` service + preset/whole-day buttons). Truly free-form
+> click-painting of every hour would require an optional custom Lovelace card
+> (e.g. a scheduler card from HACS) — deliberately not required here.
 
 ## Einrichtung / Installation
 
