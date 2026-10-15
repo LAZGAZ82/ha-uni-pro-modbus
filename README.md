@@ -142,8 +142,11 @@ Dashboard → Raw configuration editor.
 
 - `custom_components/uni_pro_modbus/const.py` holds the full register map
   extracted from the manufacturer's "UNI2 PRO and UNI3 PRO — Modbus RTU
-  communication" manual (v. 14/05/2026), with docstring notes on every
-  assumption made where the manual was ambiguous or incomplete.
+  communication" manual (v. 14/05/2026, = document revision v0.3), with
+  docstring notes on every assumption made where the manual was ambiguous
+  or incomplete. The manual itself is committed at
+  [`docs/UNI_PRO_Modbus_RTU_v0.3_eng.pdf`](docs/UNI_PRO_Modbus_RTU_v0.3_eng.pdf)
+  for reference.
 - Update `manifest.json` (`codeowners`, `documentation`, `issue_tracker`,
   `version`) with your actual GitHub org/repo before publishing.
 - Tag a GitHub release matching `manifest.json`'s `version` before adding
