@@ -46,7 +46,8 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
   - **number**: set temperatures, weather-curve points, timed-activation
     duration/temperature, heating season start/end date (month/day)
   - **select**: heating season mode, circulation control mode
-  - **switch**: DHW disinfection
+  - **switch**: DHW disinfection on/off, plus one switch per weekday for
+    the DHW disinfection schedule (UNI2 PRO)
 - **Weekly schedules** (CO1-CO7, DHW, Circulation) are readable and
   writable — read via the schedule sensors, written with the
   `uni_pro_modbus.set_schedule` service (see "Weekly schedules" below)
