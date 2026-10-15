@@ -175,13 +175,12 @@ GENERAL_CONFIG: list[RegisterDef] = [
                 RegType.HOLDING, DataType.INT16_X10, writable=True, unit="°C",
                 device_class="temperature", entity_category="config"),
     # Heating season start/end *date*: register 40002 (start) and 40003 (end)
-    # each pack the date into one 16-bit register as two bytes. ASSUMPTION:
-    # high byte = month (1-12), low byte = day (1-31). The manual documents the
-    # pair as "month/day" but does not state the byte order explicitly. Writes
-    # go through a read-modify-write (see coordinator.async_write) so setting
-    # one half preserves the other. Re-confirm on real hardware: set a known
-    # date in the controller UI, read 40002/40003 back, and swap UINT8_HIGH/LOW
-    # here if reversed.
+    # each pack the date into one 16-bit register as two bytes. Byte order is
+    # CONFIRMED by the manual (v0.3 / 14-05-2026): "Byte HI (older): month
+    # (1-12), Byte LO (younger): day (1-31)" -> high byte = month, low byte =
+    # day, exactly as mapped below (UINT8_HIGH = month, UINT8_LOW = day).
+    # Writes go through a read-modify-write (see coordinator.async_write) so
+    # setting one half preserves the other.
     RegisterDef("heating_season_start_month", "Heating season start month", 40002,
                 RegType.HOLDING, DataType.UINT8_HIGH, writable=True, native_min=1,
                 native_max=12, native_step=1, entity_category="config",
