@@ -21,14 +21,15 @@ from .const import (
     DEFAULT_HOST,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
+    DEFAULT_TIMEOUT,
     DEFAULT_UNIT_ID,
     DOMAIN,
-    MAX_CIRCUITS,
     MODEL_LABELS,
     MODEL_SUPPORTS_DHW_CIRCULATION,
     Model,
+    available_circuits,
+    build_circuit,
 )
-from .registers import build_active_registers
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,6 +66,48 @@ async def _validate_connection(hass, host: str, port: int, unit_id: int) -> None
         client.close()
 
 
+async def _read_active_circuits(
+    hass, host: str, port: int, unit_id: int, model: Model
+) -> list[int] | None:
+    """Read each circuit's on/off register (40x01, bit 0) and return the list
+    of circuit indexes the controller reports as active.
+
+    Only circuits valid for the model are probed (UNI2 PRO skips CO3). Returns
+    None on any read error so the caller can fall back to the previous
+    behaviour (preselect CO1 only). An empty list (controller answered but no
+    circuit is enabled) is returned as-is; callers treat that like the
+    fallback since a controller always drives at least one circuit."""
+    from pymodbus.client import AsyncModbusTcpClient
+
+    client = AsyncModbusTcpClient(host, port=port, timeout=DEFAULT_TIMEOUT)
+    try:
+        await client.connect()
+        if not client.connected:
+            return None
+        active: list[int] = []
+        for index in available_circuits(model):
+            reg = build_circuit(index).enabled
+            result = await client.read_holding_registers(
+                address=reg.address, count=1, **{_slave_kw(client): unit_id}
+            )
+            if result is None or result.isError():
+                _LOGGER.debug(
+                    "Auto-detect: read of CO%s enable register failed: %s",
+                    index,
+                    result,
+                )
+                return None
+            if result.registers[0] & (1 << (reg.bit or 0)):
+                active.append(index)
+        _LOGGER.debug("Auto-detected active circuits: %s", active)
+        return active
+    except Exception:  # noqa: BLE001
+        _LOGGER.exception("Could not auto-detect active circuits")
+        return None
+    finally:
+        client.close()
+
+
 class CannotConnect(Exception):
     """Bridge/TCP unreachable, or device did not answer."""
 
@@ -76,6 +119,9 @@ class UniProModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         self._data: dict[str, Any] = {}
+        # Circuits the controller reported as active at setup time (None = the
+        # probe failed; fall back to preselecting CO1 only).
+        self._detected_circuits: list[int] | None = None
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         errors: dict[str, str] = {}
@@ -96,6 +142,15 @@ class UniProModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
             else:
                 self._data.update(user_input)
+                # Probe which circuits are enabled so the next step can
+                # preselect them. Best-effort; failure just falls back to CO1.
+                self._detected_circuits = await _read_active_circuits(
+                    self.hass,
+                    user_input[CONF_HOST],
+                    user_input[CONF_PORT],
+                    user_input[CONF_UNIT_ID],
+                    Model(user_input["model"]),
+                )
                 return await self.async_step_circuits()
 
         # Re-show whatever the user just typed (not the hardcoded defaults)
@@ -126,6 +181,7 @@ class UniProModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_circuits(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         model = Model(self._data["model"])
         supports_dhw_circ = MODEL_SUPPORTS_DHW_CIRCULATION[model]
+        available = available_circuits(model)
 
         if user_input is not None:
             circuit_indexes = [int(i) for i in user_input[CONF_CIRCUITS]]
@@ -138,9 +194,15 @@ class UniProModbusConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             title = f"{MODEL_LABELS[model]} ({self._data[CONF_HOST]})"
             return self.async_create_entry(title=title, data=self._data)
 
-        circuit_options = {str(i): f"CO{i}" for i in range(1, MAX_CIRCUITS + 1)}
+        circuit_options = {str(i): f"CO{i}" for i in available}
+        # Preselect the circuits the controller reported as active; if the
+        # probe failed or reported none, fall back to CO1 only (as before).
+        detected = [i for i in (self._detected_circuits or []) if i in available]
+        default_circuits = [str(i) for i in detected] or ["1"]
         schema_dict: dict[Any, Any] = {
-            vol.Required(CONF_CIRCUITS, default=["1"]): cv.multi_select(circuit_options),
+            vol.Required(
+                CONF_CIRCUITS, default=default_circuits
+            ): cv.multi_select(circuit_options),
         }
         if supports_dhw_circ:
             schema_dict[vol.Required(CONF_DHW, default=False)] = bool
@@ -168,6 +230,7 @@ class UniProModbusOptionsFlow(config_entries.OptionsFlow):
         model = Model(self._entry.data["model"])
         supports_dhw_circ = MODEL_SUPPORTS_DHW_CIRCULATION[model]
         current = {**self._entry.data, **self._entry.options}
+        available = available_circuits(model)
 
         if user_input is not None:
             circuit_indexes = [int(i) for i in user_input[CONF_CIRCUITS]]
@@ -180,11 +243,26 @@ class UniProModbusOptionsFlow(config_entries.OptionsFlow):
             }
             return self.async_create_entry(title="", data=options)
 
-        circuit_options = {str(i): f"CO{i}" for i in range(1, MAX_CIRCUITS + 1)}
+        # Re-probe the live controller so a module added after the first setup
+        # shows up preselected. If the probe fails, keep the currently stored
+        # selection (better than resetting an existing install to CO1).
+        detected = await _read_active_circuits(
+            self.hass,
+            self._entry.data[CONF_HOST],
+            self._entry.data[CONF_PORT],
+            self._entry.data[CONF_UNIT_ID],
+            model,
+        )
+        if detected:
+            preselect = [i for i in detected if i in available]
+        else:
+            preselect = [i for i in current.get(CONF_CIRCUITS, [1]) if i in available]
+        default_circuits = [str(i) for i in preselect] or ["1"]
+
+        circuit_options = {str(i): f"CO{i}" for i in available}
         schema_dict: dict[Any, Any] = {
             vol.Required(
-                CONF_CIRCUITS,
-                default=[str(i) for i in current.get(CONF_CIRCUITS, [1])],
+                CONF_CIRCUITS, default=default_circuits
             ): cv.multi_select(circuit_options),
             vol.Required(
                 CONF_SCAN_INTERVAL, default=current.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)

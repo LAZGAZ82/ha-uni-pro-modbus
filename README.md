@@ -36,7 +36,15 @@ See `docs/bridge-firmware.md` for bridge firmware notes and open items.
 - Supports both UNI2 PRO and UNI3 PRO; DHW and Circulation are only
   offered for UNI2 PRO, since UNI3 PRO does not support those Modbus
   queries (per the manufacturer's Modbus manual)
-- Select which heating circuits (CO1-CO7) are active per installation
+- Select which heating circuits (CO1-CO7) are active per installation.
+  Circuits CO4-CO7 come from UNIM-PRO expansion modules; the active
+  circuits are **auto-detected** at setup (the circuit on/off registers
+  40x01 are read and the enabled circuits are preselected — editable by
+  hand, falls back to CO1 only if the read fails). On UNI2 PRO, CO3 is not
+  offered (the controller has no CO3; module circuits start at CO4).
+  Note: Modbus exposes no module *connection* status, so a disconnected
+  module is not reported as such — it simply stops answering for its
+  circuits.
 - Entities:
   - **sensor**: supply/outside/circuit/DHW/circulation temperatures, plus a
     read-only **weekly schedule** sensor per loop (active hours + the full
@@ -161,7 +169,9 @@ You'll need:
   controller under `Settings → Common → Communication → MODBUS RTU`,
   access code `456`)
 - The controller model (UNI2 PRO / UNI3 PRO)
-- Which heating circuits (CO1-CO7) are actually wired up
+- Which heating circuits (CO1-CO7) are actually wired up (the setup step
+  preselects the circuits the controller reports as active; CO4-CO7 are
+  the UNIM-PRO expansion-module circuits, UNI2 PRO has no CO3)
 
 The integration polls once every 30 seconds by default (adjustable in
 Settings → Devices & Services → UNI PRO Modbus → Configure).

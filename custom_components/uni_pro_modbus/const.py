@@ -73,6 +73,20 @@ MODEL_SUPPORTS_DHW_CIRCULATION = {
 
 MAX_CIRCUITS = 7  # CO1..CO7
 
+# UNI2 PRO does not have a CO3 circuit (manual, page 2); its heating circuits
+# are CO1, CO2 and then the UNIM-PRO expansion-module circuits CO4..CO7.
+# UNI3 PRO has CO1..CO3 on board plus CO4..CO7 from modules.
+UNI2_SKIPPED_CIRCUITS = {3}
+
+
+def available_circuits(model: "Model") -> list[int]:
+    """Circuit indexes that are selectable for the given model.
+
+    Expansion-module circuits always begin at CO4. UNI2 PRO has no CO3, so it
+    is never offered there (manual, page 2)."""
+    skip = UNI2_SKIPPED_CIRCUITS if model is Model.UNI2_PRO else set()
+    return [i for i in range(1, MAX_CIRCUITS + 1) if i not in skip]
+
 
 class RegType(str, Enum):
     INPUT = "input"  # function 04, read-only, 3xxxx

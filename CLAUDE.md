@@ -5,7 +5,7 @@
 
 | Teil | Pfad | Version | Details |
 |---|---|---|---|
-| HACS-Integration (Home Assistant) | `custom_components/uni_pro_modbus/` | 0.1.5 | Manufacturer: Kaiser Electronics |
+| HACS-Integration (Home Assistant) | `custom_components/uni_pro_modbus/` | 0.2.1 | Manufacturer: Kaiser Electronics |
 | ESP32-Bridge-Firmware | `firmware/` | 1.0.1 | Waveshare ESP32-S3-RS485-CAN, eModbus v1.7.2stable, USB-CDC-Flags gesetzt |
 
 ## Zielgeräte
