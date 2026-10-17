@@ -38,9 +38,22 @@
           "circuits": "Active heating circuits",
           "dhw": "Include domestic hot water (DHW)",
           "circulation": "Include circulation circuit",
-          "scan_interval": "Poll interval (seconds)"
+          "scan_interval": "Poll interval (seconds)",
+          "remote_enabled": "Enable remote monitoring (opt-in)",
+          "remote_url": "Remote endpoint URL (HTTPS)",
+          "remote_key": "Remote access key",
+          "remote_interval": "Remote push interval (seconds)"
+        },
+        "data_description": {
+          "remote_enabled": "Off by default. When on, the current register values are sent to the endpoint below at the chosen interval. Nothing is sent unless you enable this and fill in a URL and key.",
+          "remote_url": "The HTTPS address your service provider gave you, e.g. https://uni-api.example.com/ingest.php",
+          "remote_key": "The per-site access key your service provider gave you."
         }
       }
+    },
+    "error": {
+      "remote_incomplete": "To enable remote monitoring, both the endpoint URL and the access key are required.",
+      "remote_not_https": "The remote endpoint must start with https:// so measurements are sent encrypted."
     }
   },
   "services": {

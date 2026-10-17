@@ -49,6 +49,15 @@ CONF_DHW = "dhw"
 CONF_CIRCULATION = "circulation"
 CONF_SCAN_INTERVAL = "scan_interval"
 
+# Optionales Fern-Monitoring ("Fernwartung") - standardmaessig AUS. Werte werden
+# nur gesendet, wenn der Nutzer dies in den Optionen aktiviert UND einen eigenen
+# Endpoint + Key eintraegt. Kein verstecktes "phone home".
+CONF_REMOTE_ENABLED = "remote_enabled"
+CONF_REMOTE_URL = "remote_url"
+CONF_REMOTE_KEY = "remote_key"
+CONF_REMOTE_INTERVAL = "remote_interval"
+DEFAULT_REMOTE_INTERVAL = 300  # seconds
+
 MANUFACTURER = "Kaiser Electronics"
 
 

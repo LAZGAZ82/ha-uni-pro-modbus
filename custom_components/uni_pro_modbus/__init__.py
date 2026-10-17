@@ -21,8 +21,13 @@ from .const import (
     CONF_CIRCUITS,
     CONF_CIRCULATION,
     CONF_DHW,
+    CONF_REMOTE_ENABLED,
+    CONF_REMOTE_INTERVAL,
+    CONF_REMOTE_KEY,
+    CONF_REMOTE_URL,
     CONF_SCAN_INTERVAL,
     CONF_UNIT_ID,
+    DEFAULT_REMOTE_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     SCHEDULE_DAYS,
@@ -66,10 +71,32 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     await coordinator.async_config_entry_first_refresh()
 
+    # Optionales Fern-Monitoring ("Fernwartung") - nur wenn vom Nutzer in den
+    # Optionen aktiviert UND mit Endpoint + Key versehen. Aus per Default.
+    reporter = None
+    if (
+        data.get(CONF_REMOTE_ENABLED)
+        and data.get(CONF_REMOTE_URL)
+        and data.get(CONF_REMOTE_KEY)
+    ):
+        from .remote import RemoteReporter
+
+        reporter = RemoteReporter(
+            hass,
+            coordinator,
+            active,
+            url=data[CONF_REMOTE_URL],
+            api_key=data[CONF_REMOTE_KEY],
+            interval=data.get(CONF_REMOTE_INTERVAL, DEFAULT_REMOTE_INTERVAL),
+        )
+        reporter.start()
+        _LOGGER.info("UNI PRO Modbus: Fernwartung aktiv -> %s", data[CONF_REMOTE_URL])
+
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         "coordinator": coordinator,
         "active": active,
+        "reporter": reporter,
     }
 
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
@@ -165,6 +192,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         store = hass.data[DOMAIN].pop(entry.entry_id)
+        reporter = store.get("reporter")
+        if reporter is not None:
+            reporter.stop()
         await store["coordinator"].async_close()
         if not hass.data[DOMAIN]:
             hass.services.async_remove(DOMAIN, SERVICE_SET_SCHEDULE)

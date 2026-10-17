@@ -208,6 +208,31 @@ placeholder with your installation's actual entity prefix (instructions are
 in the file itself), then import it via Settings → Dashboards → Add
 Dashboard → Raw configuration editor.
 
+## Remote monitoring (optional, opt-in)
+
+The integration can optionally send the current register values to an external
+HTTPS endpoint of **your** choosing — for a service provider / installer who
+monitors the heating system remotely and alerts you if something looks wrong.
+
+**This is off by default and never sends anything on its own.** It only
+activates when you, in *Settings → Devices & Services → UNI PRO Modbus →
+Configure*, tick **"Enable remote monitoring"** and enter:
+
+- **Remote endpoint URL (HTTPS)** — the address your provider gave you, e.g.
+  `https://uni-api.example.com/ingest.php`. Must be `https://` (data is sent
+  encrypted).
+- **Remote access key** — the per-site key your provider gave you (sent as the
+  `X-Api-Key` header).
+- **Push interval** — how often the values are sent (default 300 s, min 60 s).
+
+What is sent: the current decoded values of the registers this integration is
+already polling (temperatures, states, setpoints), as JSON
+`{"device_ts": "...", "readings": {"<entity_key>": <value>, ...}}`. Nothing
+else — no credentials, no Home Assistant data beyond these register values. A
+failed push is logged at debug level and never disrupts normal operation.
+Turning the option off stops it immediately. Remote *writing* back to the
+controller is **not** part of this and is not enabled.
+
 ## Development / packaging notes for maintainers
 
 - `custom_components/uni_pro_modbus/const.py` holds the full register map

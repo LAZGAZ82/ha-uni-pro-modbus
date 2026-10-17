@@ -38,9 +38,22 @@
           "circuits": "Aktive Heizkreise",
           "dhw": "Warmwasser (DHW) einbinden",
           "circulation": "Zirkulationskreis einbinden",
-          "scan_interval": "Abfrageintervall (Sekunden)"
+          "scan_interval": "Abfrageintervall (Sekunden)",
+          "remote_enabled": "Fernwartung aktivieren (opt-in)",
+          "remote_url": "Fern-Endpoint-URL (HTTPS)",
+          "remote_key": "Fern-Zugangs-Key",
+          "remote_interval": "Sende-Intervall Fernwartung (Sekunden)"
+        },
+        "data_description": {
+          "remote_enabled": "Standardmäßig AUS. Wenn aktiviert, werden die aktuellen Registerwerte im gewählten Intervall an den unten eingetragenen Endpoint gesendet. Ohne Aktivierung + URL + Key wird nichts gesendet.",
+          "remote_url": "Die HTTPS-Adresse von deinem Dienstanbieter, z. B. https://uni-api.example.com/ingest.php",
+          "remote_key": "Der anlagenspezifische Zugangs-Key von deinem Dienstanbieter."
         }
       }
+    },
+    "error": {
+      "remote_incomplete": "Für die Fernwartung werden sowohl Endpoint-URL als auch Zugangs-Key benötigt.",
+      "remote_not_https": "Der Fern-Endpoint muss mit https:// beginnen, damit die Messwerte verschlüsselt gesendet werden."
     }
   },
   "services": {
