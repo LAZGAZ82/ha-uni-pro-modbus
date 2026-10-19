@@ -16,10 +16,15 @@ from .const import (
     CONF_CIRCUITS,
     CONF_CIRCULATION,
     CONF_DHW,
+    CONF_REMOTE_ENABLED,
+    CONF_REMOTE_INTERVAL,
+    CONF_REMOTE_KEY,
+    CONF_REMOTE_URL,
     CONF_SCAN_INTERVAL,
     CONF_UNIT_ID,
     DEFAULT_HOST,
     DEFAULT_PORT,
+    DEFAULT_REMOTE_INTERVAL,
     DEFAULT_SCAN_INTERVAL,
     DEFAULT_TIMEOUT,
     DEFAULT_UNIT_ID,
@@ -231,17 +236,35 @@ class UniProModbusOptionsFlow(config_entries.OptionsFlow):
         supports_dhw_circ = MODEL_SUPPORTS_DHW_CIRCULATION[model]
         current = {**self._entry.data, **self._entry.options}
         available = available_circuits(model)
+        errors: dict[str, str] = {}
 
         if user_input is not None:
-            circuit_indexes = [int(i) for i in user_input[CONF_CIRCUITS]]
-            options = {
-                CONF_CIRCUITS: circuit_indexes,
-                CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
-                CONF_DHW: supports_dhw_circ and user_input.get(CONF_DHW, False),
-                CONF_CIRCULATION: supports_dhw_circ
-                and user_input.get(CONF_CIRCULATION, False),
-            }
-            return self.async_create_entry(title="", data=options)
+            remote_enabled = user_input.get(CONF_REMOTE_ENABLED, False)
+            remote_url = (user_input.get(CONF_REMOTE_URL) or "").strip()
+            remote_key = (user_input.get(CONF_REMOTE_KEY) or "").strip()
+            # Fernwartung nur zulassen, wenn Endpoint + Key gesetzt sind und der
+            # Endpoint HTTPS ist (Messdaten dürfen nicht im Klartext gehen).
+            if remote_enabled and (not remote_url or not remote_key):
+                errors["base"] = "remote_incomplete"
+            elif remote_enabled and not remote_url.lower().startswith("https://"):
+                errors["base"] = "remote_not_https"
+
+            if not errors:
+                circuit_indexes = [int(i) for i in user_input[CONF_CIRCUITS]]
+                options = {
+                    CONF_CIRCUITS: circuit_indexes,
+                    CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
+                    CONF_DHW: supports_dhw_circ and user_input.get(CONF_DHW, False),
+                    CONF_CIRCULATION: supports_dhw_circ
+                    and user_input.get(CONF_CIRCULATION, False),
+                    CONF_REMOTE_ENABLED: remote_enabled,
+                    CONF_REMOTE_URL: remote_url,
+                    CONF_REMOTE_KEY: remote_key,
+                    CONF_REMOTE_INTERVAL: user_input.get(
+                        CONF_REMOTE_INTERVAL, DEFAULT_REMOTE_INTERVAL
+                    ),
+                }
+                return self.async_create_entry(title="", data=options)
 
         # Re-probe the live controller so a module added after the first setup
         # shows up preselected. If the probe fails, keep the currently stored
@@ -274,4 +297,27 @@ class UniProModbusOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(CONF_CIRCULATION, default=current.get(CONF_CIRCULATION, False))
             ] = bool
 
-        return self.async_show_form(step_id="init", data_schema=vol.Schema(schema_dict))
+        # Fernwartung (opt-in). Nach einem Fehler die gerade eingegebenen Werte
+        # wieder anzeigen statt die gespeicherten.
+        rsrc = user_input if user_input is not None else current
+        schema_dict[
+            vol.Required(
+                CONF_REMOTE_ENABLED, default=rsrc.get(CONF_REMOTE_ENABLED, False)
+            )
+        ] = bool
+        schema_dict[
+            vol.Optional(CONF_REMOTE_URL, default=rsrc.get(CONF_REMOTE_URL, ""))
+        ] = str
+        schema_dict[
+            vol.Optional(CONF_REMOTE_KEY, default=rsrc.get(CONF_REMOTE_KEY, ""))
+        ] = str
+        schema_dict[
+            vol.Required(
+                CONF_REMOTE_INTERVAL,
+                default=rsrc.get(CONF_REMOTE_INTERVAL, DEFAULT_REMOTE_INTERVAL),
+            )
+        ] = vol.All(int, vol.Range(min=60, max=3600))
+
+        return self.async_show_form(
+            step_id="init", data_schema=vol.Schema(schema_dict), errors=errors
+        )
