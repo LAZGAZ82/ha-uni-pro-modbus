@@ -29,9 +29,29 @@ struct IrdRemoteView {
 
 /* ---------------------------------------------------------------- Zeichnen */
 
-static void draw_label_fit(Canvas* canvas, int32_t cx, int32_t cy, int32_t max_w, const char* text) {
+/* Kuerzt den Text auf max_w Pixel. Bei schmalen Knoepfen ohne "...", damit
+ * moeglichst viele Zeichen sichtbar bleiben. */
+static void fit_label(Canvas* canvas, FuriString* s, int32_t max_w, bool ellipsis) {
+    if(max_w < 1) max_w = 1;
+    if(ellipsis) {
+        elements_string_fit_width(canvas, s, max_w);
+        return;
+    }
+    while(furi_string_size(s) > 1 &&
+          canvas_string_width(canvas, furi_string_get_cstr(s)) > max_w) {
+        furi_string_left(s, furi_string_size(s) - 1);
+    }
+}
+
+static void draw_label(
+    Canvas* canvas,
+    int32_t cx,
+    int32_t cy,
+    int32_t max_w,
+    const char* text,
+    bool ellipsis) {
     FuriString* s = furi_string_alloc_set(text);
-    elements_string_fit_width(canvas, s, max_w);
+    fit_label(canvas, s, max_w, ellipsis);
     canvas_draw_str_aligned(canvas, cx, cy, AlignCenter, AlignCenter, furi_string_get_cstr(s));
     furi_string_free(s);
 }
@@ -59,21 +79,34 @@ static void draw_button(Canvas* canvas, const IrdButton* b, bool focused, bool m
     const bool has_icon = b->icon != IrdIconNone && b->icon < IrdIconCount;
     const int32_t cx = x + w / 2;
     const int32_t cy = y + h / 2;
+    /* Platz fuer die "?"-Markierung rechts oben freihalten */
+    const int32_t marker_w = b->has_signal ? 0 : 6;
+    const int32_t avail = w - 4 - marker_w;
+    const bool narrow = b->w == 1;
 
     if(has_icon && b->h == 1 && b->w == 1) {
-        ird_icon_draw(canvas, cx - IRD_ICON_W / 2, cy - IRD_ICON_H / 2, b->icon);
+        ird_icon_draw(canvas, cx - IRD_ICON_W / 2 - marker_w / 3, cy - IRD_ICON_H / 2, b->icon);
     } else if(has_icon && b->h == 1) {
-        ird_icon_draw(canvas, x + 3, cy - IRD_ICON_H / 2, b->icon);
         canvas_set_font(canvas, FontSecondary);
-        int32_t tx = x + 3 + IRD_ICON_W + 2;
-        draw_label_fit(canvas, tx + (x + w - 2 - tx) / 2, cy, (x + w - 2 - tx), b->label);
+        int32_t text_w = canvas_string_width(canvas, b->label);
+        if(text_w <= avail - IRD_ICON_W - 2 || text_w > avail) {
+            /* Symbol links, Text im Rest (ggf. gekuerzt) */
+            int32_t tx = x + 3 + IRD_ICON_W + 2;
+            int32_t tw = avail - IRD_ICON_W - 3;
+            ird_icon_draw(canvas, x + 3, cy - IRD_ICON_H / 2, b->icon);
+            draw_label(canvas, tx + tw / 2, cy, tw, b->label, true);
+        } else {
+            /* Text passt nur ohne Symbol: dann nur Text */
+            draw_label(canvas, x + 2 + avail / 2, cy, avail, b->label, true);
+        }
     } else if(has_icon) {
         ird_icon_draw(canvas, cx - IRD_ICON_W / 2, y + 2, b->icon);
         canvas_set_font(canvas, FontSecondary);
-        draw_label_fit(canvas, cx, y + 2 + IRD_ICON_H + (h - IRD_ICON_H - 2) / 2, w - 4, b->label);
+        draw_label(
+            canvas, cx, y + 2 + IRD_ICON_H + (h - IRD_ICON_H - 2) / 2, avail, b->label, !narrow);
     } else {
-        canvas_set_font(canvas, b->w >= 2 ? FontPrimary : FontSecondary);
-        draw_label_fit(canvas, cx, cy, w - 4, b->label);
+        canvas_set_font(canvas, narrow ? FontSecondary : FontPrimary);
+        draw_label(canvas, x + 2 + avail / 2, cy, avail, b->label, !narrow);
     }
 
     /* Markierung fuer Knopf ohne Signal */
@@ -96,7 +129,8 @@ static void draw_header(Canvas* canvas, const IrdRemoteViewModel* m) {
     if(m->status) {
         furi_string_set(right, m->status);
     } else if(m->move_mode) {
-        furi_string_set(right, "Verschieben: OK=fertig");
+        furi_string_set(left, "Verschieben");
+        furi_string_set(right, "OK = fertig");
     } else if(m->transmitting) {
         furi_string_set(right, "Sende...");
     } else if(m->remote && m->remote->button_count > 0 && m->focus < m->remote->button_count) {

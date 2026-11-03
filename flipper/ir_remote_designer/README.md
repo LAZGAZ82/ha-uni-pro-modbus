@@ -154,3 +154,6 @@ Wichtige Entscheidungen:
 - Die App wurde hier gegen das SDK gebaut und statisch geprüft
   (Symbol-Check gegen API 88.2); ein Test auf echter Hardware stand in dieser
   Umgebung nicht zur Verfügung.
+- `tools/hosttest/run.sh` rendert die Raster-Ansicht mit allen Vorlagen auf
+  dem PC (Shim statt Firmware) als PNG nach `tools/hosttest/out/` und prüft
+  Navigation/Verschieben – praktisch für Layout-Änderungen ohne Gerät.

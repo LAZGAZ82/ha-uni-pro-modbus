@@ -45,7 +45,7 @@ static const TplButton tpl_projector[] = {
     {"Runter", IrdIconDown, 2, 3, 1, 1},
     {"Zoom-", IrdIconZoomOut, 3, 3, 1, 1},
     {"Stumm", IrdIconMute, 0, 4, 1, 1},
-    {"Keystone", IrdIconNone, 1, 4, 2, 1},
+    {"Trapez", IrdIconNone, 1, 4, 2, 1},
     {"Format", IrdIconTv, 3, 4, 1, 1},
 };
 
@@ -87,7 +87,7 @@ static const TplButton tpl_hifi[] = {
     {"Power", IrdIconPower, 0, 0, 1, 1},
     {"Source", IrdIconSource, 1, 0, 1, 1},
     {"Tuner", IrdIconHash, 2, 0, 1, 1},
-    {"BT/USB", IrdIconNone, 3, 0, 1, 1},
+    {"USB", IrdIconNone, 3, 0, 1, 1},
     {"Vol+", IrdIconVolUp, 0, 1, 2, 1},
     {"Vol-", IrdIconVolDown, 2, 1, 2, 1},
     {"Prev", IrdIconPrev, 0, 2, 1, 1},

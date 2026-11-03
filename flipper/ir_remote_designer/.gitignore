@@ -3,3 +3,4 @@ build/
 *.o
 *.d
 __pycache__/
+tools/hosttest/out/
