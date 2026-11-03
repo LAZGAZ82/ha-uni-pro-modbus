@@ -252,3 +252,11 @@ controller is **not** part of this and is not enabled.
 - Run `python3 -m json.tool` on `hacs.json`/`manifest.json` and Home
   Assistant's `hassfest` / HACS validation actions (see
   `.github/workflows/`) before publishing.
+
+## Nebenprojekt: Flipper Zero "IR Remote Designer"
+
+Unabhängig von der Modbus-Integration liegt unter
+[`flipper/ir_remote_designer/`](flipper/ir_remote_designer/README.md) eine
+Flipper-Zero-App, mit der sich eigene IR-Fernbedienungen mit frei belegbaren
+Tasten zusammenstellen lassen (Signale aus der vorhandenen `.ir`-Bibliothek
+oder direkt angelernt). Fertiges Binary: `flipper/ir_remote_designer/dist/`.

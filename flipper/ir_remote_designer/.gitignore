@@ -1,0 +1,5 @@
+.ufbt/
+build/
+*.o
+*.d
+__pycache__/
