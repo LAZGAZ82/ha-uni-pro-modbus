@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" font-family="DejaVu Sans, Segoe UI, Arial, sans-serif">
+  <!-- Quelle der Grafik in Kap. 4.2 der Anleitung v1.5 (ersetzt das Bild aus v1.4 mit
+       "RS485 nicht isoliert"). RS485-Klemme der Bridge: nur A+/B-. GND des Reglers an GND/-V
+       der Versorgungsklemme: empfohlen, nicht zwingend (Gegentest 24.11.2026). -->
+  <!-- Leitungsfarben wie verdrahtung-unim-bridge.svg: Farbe der Bridge-Klemme (A+ blau, B- orange). -->
+  <rect width="1600" height="900" fill="#fff"/>
+  <text x="800" y="62" text-anchor="middle" font-size="34" font-weight="700" fill="#1f2a37">RS485-Verdrahtung Regler ↔ Bridge</text>
+  <text x="800" y="102" text-anchor="middle" font-size="21" fill="#5b6472">A/B gekreuzt · GND des Reglers an GND (−V) der Bridge-Versorgung: empfohlen</text>
+
+  <rect x="90" y="160" width="520" height="430" rx="16" fill="#eef1f6" stroke="#3c4a5e" stroke-width="3"/>
+  <text x="350" y="220" text-anchor="middle" font-size="30" font-weight="700" fill="#1f2a37">Regler UNI2 / UNI3 PRO</text>
+  <text x="350" y="256" text-anchor="middle" font-size="19" fill="#5b6472">RS485-Klemmen</text>
+  <g font-size="27" font-weight="700" text-anchor="middle">
+    <rect x="470" y="300" width="100" height="70" rx="8" fill="#fff" stroke="#3c4a5e" stroke-width="3"/><text x="520" y="345" fill="#1d6fe8">A</text>
+    <rect x="470" y="390" width="100" height="70" rx="8" fill="#fff" stroke="#3c4a5e" stroke-width="3"/><text x="520" y="435" fill="#e0520f">B</text>
+    <rect x="470" y="480" width="100" height="70" rx="8" fill="#fff" stroke="#3c4a5e" stroke-width="3"/><text x="520" y="525" fill="#222">GND</text>
+  </g>
+
+  <rect x="990" y="160" width="520" height="330" rx="16" fill="#eef3fb" stroke="#2556a8" stroke-width="3"/>
+  <text x="1250" y="220" text-anchor="middle" font-size="30" font-weight="700" fill="#1f2a37">Bridge (Waveshare)</text>
+  <text x="1250" y="256" text-anchor="middle" font-size="19" fill="#5b6472">RS485-Klemme: nur A+ und B−</text>
+  <g font-size="27" font-weight="700" text-anchor="middle">
+    <rect x="1030" y="300" width="100" height="70" rx="8" fill="#fff" stroke="#2556a8" stroke-width="3"/><text x="1080" y="345" fill="#1d6fe8">A+</text>
+    <rect x="1030" y="390" width="100" height="70" rx="8" fill="#fff" stroke="#2556a8" stroke-width="3"/><text x="1080" y="435" fill="#e0520f">B−</text>
+  </g>
+  <text x="1160" y="345" font-size="18" fill="#5b6472">120-Ω-Jumper</text>
+  <text x="1160" y="370" font-size="18" fill="#5b6472">gesteckt</text>
+
+  <rect x="990" y="510" width="520" height="150" rx="16" fill="#f6f6f6" stroke="#8a8f98" stroke-width="3"/>
+  <text x="1250" y="555" text-anchor="middle" font-size="22" font-weight="700" fill="#1f2a37">Versorgungsklemme Bridge</text>
+  <g font-size="24" font-weight="700" text-anchor="middle">
+    <rect x="1030" y="575" width="130" height="66" rx="8" fill="#fff" stroke="#8a8f98" stroke-width="3"/><text x="1095" y="617" fill="#222">GND (−V)</text>
+    <rect x="1180" y="575" width="130" height="66" rx="8" fill="#fff" stroke="#8a8f98" stroke-width="3"/><text x="1245" y="617" fill="#b00020">+12 V</text>
+  </g>
+  <text x="1330" y="605" font-size="17" fill="#5b6472">vom Netzteil</text>
+  <text x="1330" y="628" font-size="17" fill="#5b6472">DIN15W12</text>
+
+  <polyline points="570,335 730,335 850,425 1030,425" fill="none" stroke="#e0520f" stroke-width="7"/>
+  <polyline points="570,425 730,425 850,335 1030,335" fill="none" stroke="#1d6fe8" stroke-width="7"/>
+  <polyline points="570,515 900,515 900,608 1030,608" fill="none" stroke="#222" stroke-width="7" stroke-dasharray="18 12"/>
+  <text x="735" y="500" text-anchor="middle" font-size="18" font-style="italic" fill="#5b6472">empfohlen</text>
+
+  <rect x="620" y="250" width="330" height="40" rx="20" fill="#c62828"/>
+  <text x="785" y="277" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">GEKREUZT: A+→B, B−→A</text>
+  <rect x="640" y="680" width="300" height="40" rx="20" fill="#5b6472"/>
+  <text x="790" y="707" text-anchor="middle" font-size="19" font-weight="700" fill="#fff">GND empfohlen</text>
+
+  <text x="800" y="780" text-anchor="middle" font-size="19" fill="#1f2a37">RS485-Seite laut Schaltplan galvanisch getrennt; die Klemme hat keinen eigenen GND.</text>
+  <text x="800" y="810" text-anchor="middle" font-size="19" fill="#1f2a37">Eine Verbindung Regler-GND ↔ −V kann bei Masseproblemen helfen.</text>
+  <text x="800" y="860" text-anchor="middle" font-size="16" fill="#8a8f98">Verdrillte, geschirmte Leitung (z. B. J-Y(St)Y), Schirm einseitig auflegen · Arbeiten nur spannungsfrei</text>
+</svg>

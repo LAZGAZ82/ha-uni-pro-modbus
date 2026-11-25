@@ -1,0 +1,82 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "UNI PRO Modbus bridge",
+        "description": "Connect to the Modbus TCP bridge (e.g. an ESP32 RS485-to-TCP gateway) wired to your UNI2/UNI3 PRO controller.",
+        "data": {
+          "host": "Bridge IP address or hostname",
+          "port": "Bridge TCP port",
+          "unit_id": "Modbus Slave ID (device address)",
+          "model": "Controller model",
+          "scan_interval": "Poll interval (seconds)"
+        }
+      },
+      "circuits": {
+        "title": "Heating circuits",
+        "description": "Select the heating circuits (CO1-CO7) of this {model} and whether DHW/circulation should be included. Only select circuits that are active on the controller; circuits the controller reports as active are already ticked.",
+        "data": {
+          "circuits": "Active heating circuits",
+          "dhw": "Include domestic hot water (DHW)",
+          "circulation": "Include circulation circuit"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach the bridge or get a response from the controller. Check the IP/port and that the RS485 wiring and Slave ID are correct.",
+      "unknown": "Unexpected error, see the Home Assistant log for details.",
+      "no_answer": "The bridge is reachable, but the controller did not answer. After the controller has been switched off and on it takes about 1 minute until it answers - please wait and try again. Otherwise check the RS485 wiring, Modbus activation at the controller [13-12-3] and the slave ID."
+    },
+    "abort": {
+      "already_configured": "This device is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "UNI PRO Modbus options",
+        "data": {
+          "circuits": "Active heating circuits",
+          "dhw": "Include domestic hot water (DHW)",
+          "circulation": "Include circulation circuit",
+          "scan_interval": "Poll interval (seconds)",
+          "remote_enabled": "Enable remote monitoring (opt-in)",
+          "remote_url": "Remote endpoint URL (HTTPS)",
+          "remote_key": "Remote access key",
+          "remote_interval": "Remote push interval (seconds)",
+          "request_pause_ms": "Pause between requests (ms)"
+        },
+        "data_description": {
+          "remote_enabled": "Off by default. When on, the current register values are sent to the endpoint below at the chosen interval. Nothing is sent unless you enable this and fill in a URL and key.",
+          "remote_url": "The HTTPS address your service provider gave you, e.g. https://uni-api.example.com/ingest.php",
+          "remote_key": "The per-site access key your service provider gave you.",
+          "request_pause_ms": "Short pause between two Modbus requests so the bridge and the RS485 bus are not flooded. Default 50 ms; increase (e.g. 100-200 ms) if values drop out sporadically."
+        }
+      }
+    },
+    "error": {
+      "remote_incomplete": "To enable remote monitoring, both the endpoint URL and the access key are required.",
+      "remote_not_https": "The remote endpoint must start with https:// so measurements are sent encrypted."
+    }
+  },
+  "services": {
+    "set_schedule": {
+      "name": "Set weekly schedule",
+      "description": "Write a weekly on/off schedule (per hour) to a heating circuit, the DHW circuit or the circulation circuit. Only the days you provide are changed; omitted days keep their current schedule on the device.",
+      "fields": {
+        "entry_id": {
+          "name": "Integration instance",
+          "description": "Which UNI PRO Modbus instance to target. Optional if only one is configured."
+        },
+        "schedule": {
+          "name": "Schedule",
+          "description": "Which loop's schedule to write."
+        },
+        "days": {
+          "name": "Days",
+          "description": "Mapping of weekday to the hours that should be ON. Each day's value is a list of hour numbers (0-23), or the shortcut \"all\" or \"none\". Weekdays not listed are left unchanged."
+        }
+      }
+    }
+  }
+}

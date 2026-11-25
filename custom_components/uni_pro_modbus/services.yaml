@@ -1,0 +1,45 @@
+set_schedule:
+  name: Set weekly schedule
+  description: >-
+    Write a weekly on/off schedule (per hour) to a heating circuit, the DHW
+    circuit or the circulation circuit. Only the days you provide are changed;
+    omitted days keep their current schedule on the device.
+  fields:
+    entry_id:
+      name: Integration instance
+      description: >-
+        Which UNI PRO Modbus instance to target. Optional if only one is
+        configured.
+      required: false
+      selector:
+        config_entry:
+          integration: uni_pro_modbus
+    schedule:
+      name: Schedule
+      description: Which loop's schedule to write.
+      required: true
+      example: co1_schedule
+      selector:
+        select:
+          options:
+            - co1_schedule
+            - co2_schedule
+            - co3_schedule
+            - co4_schedule
+            - co5_schedule
+            - co6_schedule
+            - co7_schedule
+            - dhw_schedule
+            - circulation_schedule
+    days:
+      name: Days
+      description: >-
+        Mapping of weekday to the hours that should be ON. Each day's value is
+        either a list of hour numbers (0-23) that are active, or the shortcut
+        "all" (24 h on) or "none" (off all day). Weekdays not listed are left
+        unchanged. Example: {"monday": [6, 7, 8, 18, 19, 20], "sunday": "all",
+        "saturday": "none"}.
+      required: true
+      example: '{"monday": [6, 7, 8, 18, 19, 20], "sunday": "all"}'
+      selector:
+        object:

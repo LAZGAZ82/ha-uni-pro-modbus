@@ -1,0 +1,82 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "UNI PRO Modbus-Bridge",
+        "description": "Verbindung zur Modbus-TCP-Bridge herstellen (z. B. ein ESP32 RS485-zu-TCP-Gateway), die per RS485 an deinen UNI2/UNI3 PRO Regler angeschlossen ist.",
+        "data": {
+          "host": "IP-Adresse oder Hostname der Bridge",
+          "port": "TCP-Port der Bridge",
+          "unit_id": "Modbus Slave-ID (Geräteadresse)",
+          "model": "Reglermodell",
+          "scan_interval": "Abfrageintervall (Sekunden)"
+        }
+      },
+      "circuits": {
+        "title": "Heizkreise",
+        "description": "Wähle die Heizkreise (CO1-CO7) für dieses {model} sowie ob Warmwasser/Zirkulation eingebunden werden sollen. Wähle nur Kreise, die am Regler aktiv sind; Kreise, die der Regler als aktiv meldet, sind bereits vorausgewählt.",
+        "data": {
+          "circuits": "Aktive Heizkreise",
+          "dhw": "Warmwasser (DHW) einbinden",
+          "circulation": "Zirkulationskreis einbinden"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Bridge nicht erreichbar oder keine Antwort vom Regler. Prüfe IP/Port sowie RS485-Verkabelung und Slave-ID.",
+      "unknown": "Unerwarteter Fehler, siehe Home-Assistant-Log für Details.",
+      "no_answer": "Die Bridge ist erreichbar, aber der Regler antwortet nicht. Nachdem der Regler aus- und wieder eingeschaltet wurde, dauert es ca. 1 Minute, bis er antwortet – bitte kurz warten und erneut versuchen. Sonst RS485-Verdrahtung, Modbus-Aktivierung am Regler [13-12-3] und Slave-ID prüfen."
+    },
+    "abort": {
+      "already_configured": "Dieses Gerät ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "UNI PRO Modbus Optionen",
+        "data": {
+          "circuits": "Aktive Heizkreise",
+          "dhw": "Warmwasser (DHW) einbinden",
+          "circulation": "Zirkulationskreis einbinden",
+          "scan_interval": "Abfrageintervall (Sekunden)",
+          "remote_enabled": "Fernwartung aktivieren (opt-in)",
+          "remote_url": "Fern-Endpoint-URL (HTTPS)",
+          "remote_key": "Fern-Zugangs-Key",
+          "remote_interval": "Sende-Intervall Fernwartung (Sekunden)",
+          "request_pause_ms": "Pause zwischen Anfragen (ms)"
+        },
+        "data_description": {
+          "remote_enabled": "Standardmäßig AUS. Wenn aktiviert, werden die aktuellen Registerwerte im gewählten Intervall an den unten eingetragenen Endpoint gesendet. Ohne Aktivierung + URL + Key wird nichts gesendet.",
+          "remote_url": "Die HTTPS-Adresse von deinem Dienstanbieter, z. B. https://uni-api.example.com/ingest.php",
+          "remote_key": "Der anlagenspezifische Zugangs-Key von deinem Dienstanbieter.",
+          "request_pause_ms": "Kurze Pause zwischen zwei Modbus-Anfragen, damit Bridge und RS485-Bus nicht überlastet werden. Standard 50 ms; bei sporadisch fehlenden Werten erhöhen (z. B. 100–200 ms)."
+        }
+      }
+    },
+    "error": {
+      "remote_incomplete": "Für die Fernwartung werden sowohl Endpoint-URL als auch Zugangs-Key benötigt.",
+      "remote_not_https": "Der Fern-Endpoint muss mit https:// beginnen, damit die Messwerte verschlüsselt gesendet werden."
+    }
+  },
+  "services": {
+    "set_schedule": {
+      "name": "Wochen-Zeitprogramm setzen",
+      "description": "Schreibt ein wochenweises Zeitprogramm (stundenweise Ein/Aus) für einen Heizkreis, den Warmwasser- (DHW) oder den Zirkulationskreis. Nur die angegebenen Tage werden geändert; nicht genannte Tage behalten ihr aktuelles Programm im Gerät.",
+      "fields": {
+        "entry_id": {
+          "name": "Integrations-Instanz",
+          "description": "Welche UNI-PRO-Modbus-Instanz angesprochen wird. Optional, wenn nur eine eingerichtet ist."
+        },
+        "schedule": {
+          "name": "Zeitprogramm",
+          "description": "Zeitprogramm welches Kreises geschrieben werden soll."
+        },
+        "days": {
+          "name": "Tage",
+          "description": "Zuordnung von Wochentag zu den Stunden, die EIN sein sollen. Jeder Tagwert ist eine Liste von Stundenzahlen (0-23) oder die Abkürzung \"all\" bzw. \"none\". Nicht genannte Wochentage bleiben unverändert."
+        }
+      }
+    }
+  }
+}
