@@ -158,7 +158,7 @@ The English quick reference follows below.
 
 ## Installation
 
-### Via HACS (recommended once this repo is on GitHub)
+### Via HACS (recommended)
 
 1. HACS → the 3-dot menu → **Custom repositories**
 2. Add this repository's URL, category **Integration**
